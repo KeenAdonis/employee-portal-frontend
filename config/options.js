@@ -24,6 +24,11 @@ export const departmentOptions = [
     { value: "Neuro Department", label: "Neuro Department" },
 ];
 
+export const companyOptions = [
+    { value: "Psy Systems and Innovations, OPC", label: "Psy Systems and Innovations, OPC" },
+    { value: "Pillars Psychological Services", label: "Pillars Psychological Services" },
+];
+
 export const positionOptions = [
     { value: "President", label: "President" },
     { value: "Executive Director", label: "Executive Director" },
@@ -41,11 +46,63 @@ export const positionOptions = [
     { value: "Play Therapist", label: "Play Therapist" },
     { value: "Behavioral Therapist", label: "Behavioral Therapist" },
     { value: "General Services Assistant", label: "General Services Assistant" },
-    { value: "Utility and Maintenance Personel", label: "Utility and Maintenance Personel" },
+    { value: "Utility and Maintenance Personnel", label: "Utility and Maintenance Personnel" },
 ];
 
 export const jobLevelOptions = [
     { value: "Staff", label: "Staff" },
     { value: "Supervisor", label: "Supervisor" },
     { value: "Manager", label: "Manager" },
+];
+
+export const leaveTypeOptions = [
+    { value: "Vacation Leave", label: "Vacation Leave" },
+    { value: "Sick Leave", label: "Sick Leave" },
+    { value: "Emergency Leave", label: "Emergency Leave" },
+    { value: "Maternity Leave", label: "Maternity Leave" },
+    { value: "Paternity Leave", label: "Paternity Leave" },
+    { value: "Bereavement Leave", label: "Bereavement Leave" },
+    { value: "Birthday Leave", label: "Birthday Leave" },
+    { value: "Other Leave", label: "Other Leave" },
+];
+
+export const durationOptions = [
+    { value: "Whole Day", label: "Whole Day" },
+    { value: "Half Day AM", label: "Half Day AM" },
+    { value: "Half Day PM", label: "Half Day PM" },
+];
+
+export const documentStatusOptions = [
+    { value: "All", label: "All Status" },
+    { value: "Draft", label: "Draft" },
+    { value: "Queued", label: "Queued" },
+    { value: "Sent", label: "Sent" },
+    { value: "Failed", label: "Failed" },
+];
+
+export const logActionOptions = [
+    { value: "All", label: "All Actions" },
+    { value: "Upload", label: "Upload" },
+    { value: "Send", label: "Send" },
+    { value: "Resend", label: "Resend" },
+];
+
+export const logStatusOptions = [
+    { value: "All", label: "All Status" },
+    { value: "Processing", label: "Queued" },
+    { value: "Success", label: "Sent" },
+    { value: "Failed", label: "Failed" },
+];
+
+export const transportationTypeOptions = [
+    { value: "Company Vehicle", label: "Company Vehicle" },
+    { value: "Personal Vehicle", label: "Personal Vehicle" },
+    { value: "Commute", label: "Commute" },
+    { value: "Other", label: "Other" },
+];
+
+export const fuelTypeOptions = [
+    { value: "Diesel", label: "Diesel" },
+    { value: "Premium", label: "Premium" },
+    { value: "Regular", label: "Regular" },
 ];

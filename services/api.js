@@ -6,7 +6,7 @@ const api = axios.create({
     Accept: "application/json",
   },
 });
-
+console.log("ENV:", process.env.NEXT_PUBLIC_API_URL);
 // 🔥 AUTO ATTACH TOKEN EVERY REQUEST
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");

@@ -1,35 +1,47 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function Drawer({ open, onClose, title, children, footer }) {
 
+    const [mounted, setMounted] = useState(false);
+
     useEffect(() => {
+        setMounted(true);
+
         const handleEsc = (e) => {
             if (e.key === "Escape") onClose();
         };
+
         document.addEventListener("keydown", handleEsc);
         return () => document.removeEventListener("keydown", handleEsc);
     }, [onClose]);
 
-    return (
+    // ❗ prevent SSR mismatch
+    if (!mounted) return null;
+
+    return createPortal(
         <div
-            className={`fixed inset-0 z-50 flex transition-all duration-300 ${open ? "visible opacity-100" : "invisible opacity-0"
-                }`}
+            className={`fixed inset-0 z-[9999] flex transition-all duration-300 ${
+                open ? "visible opacity-100" : "invisible opacity-0"
+            }`}
         >
 
             {/* OVERLAY */}
             <div
-                className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${open ? "opacity-100" : "opacity-0"
-                    }`}
+                className={`fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
+                    open ? "opacity-100" : "opacity-0"
+                }`}
                 onClick={onClose}
             />
 
             {/* DRAWER PANEL */}
             <div
-                className={`ml-auto w-full max-w-md h-full bg-white shadow-xl relative z-50 flex flex-col transform transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"
-                    }`}
+                className={`ml-auto w-full max-w-md h-screen bg-white shadow-xl relative flex flex-col transform transition-transform duration-300 ${
+                    open ? "translate-x-0" : "translate-x-full"
+                }`}
             >
 
                 {/* HEADER */}
@@ -57,6 +69,7 @@ export default function Drawer({ open, onClose, title, children, footer }) {
                 )}
 
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

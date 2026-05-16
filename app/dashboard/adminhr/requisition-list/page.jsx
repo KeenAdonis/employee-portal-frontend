@@ -15,7 +15,7 @@ import api from "@/services/api";
 import { Eye, Download, Paperclip } from "lucide-react";
 
 export default function Page() {
-
+    const [loading, setLoading] = useState(true);
     const [data, setData] = useState([]);
     const [selected, setSelected] = useState(null);
     const [openDrawer, setOpenDrawer] = useState(false);
@@ -32,25 +32,37 @@ export default function Page() {
 
     /* ================= FETCH ================= */
     const fetchRequisition = async (pageNumber = 1) => {
+
         try {
-            let statusFilter = tab === "requests"
-                ? "Checked"
-                : "Approved,Rejected";
+
+            setLoading(true);
+
+            let statusFilter =
+                tab === "requests"
+                    ? "Checked"
+                    : "Approved,Liquidated,Rejected";
 
             const res = await api.get(
                 `/requisition?page=${pageNumber}&status=${statusFilter}`
             );
 
             setData(res.data.data.data || []);
+
             setMeta(res.data.data);
 
         } catch (err) {
+
             console.error(err);
+
             showToast({
                 title: "Error",
                 message: "Failed to fetch requisitions",
                 type: "error",
             });
+
+        } finally {
+
+            setLoading(false);
         }
     };
 
@@ -119,7 +131,7 @@ export default function Page() {
 
         testUser();
     }, []);
-    
+
     useEffect(() => {
         fetchRequisition(page);
     }, [page, tab]);
@@ -137,7 +149,11 @@ export default function Page() {
             </div>
 
             {/* TABLE */}
-            <RequisitionTable data={data} onView={handleView} />
+            <RequisitionTable
+                data={data}
+                loading={loading}
+                onView={handleView}
+            />
 
             {/* PAGINATION */}
             <div className="mt-4 flex justify-end">

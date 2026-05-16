@@ -7,6 +7,7 @@ import CustomSelect from "@/components/ui/CustomSelect";
 import CustomDatePicker from "@/components/ui/CustomDatePicker";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/ToastProvider";
+import { formatDateForApi } from "@/lib/format";
 import api from "@/services/api";
 
 import {
@@ -16,6 +17,7 @@ import {
     jobLevelOptions,
     departmentOptions,
     positionOptions,
+    companyOptions,
 } from "@/config/options";
 
 /* =========================
@@ -34,6 +36,7 @@ const initialForm = {
     EmailAddress: "",
     DateHired: "",
     Department: "",
+    Company: "",
     CompanyStatus: "",
     Position: "",
     JobLevel: "",
@@ -69,20 +72,6 @@ function FormField({ label, name, required = false, error, value, children }) {
             {error && <span className="text-xs text-red-500">{error}</span>}
         </div>
     );
-}
-/* =========================
-   FORMAT CONTACT NUMBER
-========================= */
-function formatCurrency(value) {
-    if (!value) return "";
-
-    const number = Number(value.toString().replace(/,/g, ""));
-    if (isNaN(number)) return "";
-
-    return number.toLocaleString("en-US", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-    });
 }
 
 /* =========================
@@ -155,6 +144,7 @@ export default function AddEmployeeModal({ open, onClose, onSuccess }) {
         if (!form.HomeAddress) newErrors.HomeAddress = "This field is required!";
 
         if (!form.Department) newErrors.Department = "This field is required!";
+        if (!form.Company) newErrors.Company = "This field is required!";
         if (!form.Position) newErrors.Position = "This field is required!";
         if (!form.CompanyStatus) newErrors.CompanyStatus = "This field is required!";
         if (!form.JobLevel) newErrors.JobLevel = "This field is required!";
@@ -187,13 +177,14 @@ export default function AddEmployeeModal({ open, onClose, onSuccess }) {
                 MiddleInitial: form.MiddleInitial,
                 LastName: form.LastName,
                 HomeAddress: form.HomeAddress,
-                Birthday: form.Birthday,
+                Birthday: formatDateForApi(form.Birthday),
                 Gender: form.Gender,
                 CivilStatus: form.CivilStatus,
                 ContactNumber: form.ContactNumber.replace(/\s/g, ""),
                 EmailAddress: form.EmailAddress,
-                DateHired: form.DateHired,
+                DateHired: formatDateForApi(form.DateHired),
                 Department: form.Department,
+                Company: form.Company,
                 CompanyStatus: form.CompanyStatus,
                 Position: form.Position,
                 JobLevel: form.JobLevel,
@@ -445,6 +436,22 @@ export default function AddEmployeeModal({ open, onClose, onSuccess }) {
                                 options={departmentOptions}
                                 onChange={(value) =>
                                     handleChange("Department", value)
+                                }
+                            />
+                        </FormField>
+
+                        <FormField
+                            label="Company"
+                            name="Company"
+                            required
+                            error={errors.Company}
+                            value={form.Company}
+                        >
+                            <CustomSelect
+                                value={form.Company}
+                                options={companyOptions}
+                                onChange={(value) =>
+                                    handleChange("Company", value)
                                 }
                             />
                         </FormField>

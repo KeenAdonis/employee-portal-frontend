@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export default function Sidebar({
     user,
@@ -12,6 +12,7 @@ export default function Sidebar({
     setMobileOpen,
 }) {
     const pathname = usePathname();
+    const navRef = useRef(null);
 
     useEffect(() => {
         const saved = localStorage.getItem("sidebarCollapsed");
@@ -19,6 +20,28 @@ export default function Sidebar({
             document.documentElement.dataset.sidebar =
                 JSON.parse(saved) ? "collapsed" : "expanded";
         }
+    }, []);
+
+    useEffect(() => {
+        const el = navRef.current;
+        if (!el) return;
+
+        let timeout;
+
+        const handleScroll = () => {
+            el.classList.add("scrolling");
+
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                el.classList.remove("scrolling");
+            }, 800); // hide after scroll stops
+        };
+
+        el.addEventListener("scroll", handleScroll);
+
+        return () => {
+            el.removeEventListener("scroll", handleScroll);
+        };
     }, []);
 
     return (
@@ -60,7 +83,7 @@ export default function Sidebar({
                     {!collapsed && (
                         <div className="flex flex-col leading-tight">
                             <span className="font-semibold text-sm tracking-wide text-white">
-                                Company Portal
+                                PSI, OPC Portal
                             </span>
                             <span className="text-[11px] text-white/50">
                                 Secure access to your workspace
@@ -72,7 +95,10 @@ export default function Sidebar({
             </div>
 
             {/* MENU */}
-            <nav className="flex-1 px-2 py-4 space-y-6 overflow-y-auto overflow-x-hidden">
+            <nav
+                ref={navRef}
+                className="sidebar-scroll flex-1 px-2 py-4 space-y-6 overflow-y-auto overflow-x-hidden"
+            >
 
                 {menu.map((section, sIndex) => (
                     <div key={sIndex}>
@@ -102,8 +128,8 @@ export default function Sidebar({
                                             py-2.5 rounded-xl
                                             transition-all duration-200
                                             ${isActive
-                                              ? "bg-gradient-to-r from-amber-400 to-amber-500 text-[#0f172a] shadow-lg shadow-amber-500/30"
-                                              : "text-white hover:bg-amber-400/10"}
+                                                ? "bg-gradient-to-r from-amber-400 to-amber-500 text-[#0f172a] shadow-lg shadow-amber-500/30"
+                                                : "text-white hover:bg-amber-400/10"}
                                         `}
                                     >
 

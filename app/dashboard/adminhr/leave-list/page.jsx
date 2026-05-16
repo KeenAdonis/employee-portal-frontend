@@ -15,7 +15,7 @@ import api from "@/services/api";
 import { Eye, Download } from "lucide-react";
 
 export default function Page() {
-
+    const [loading, setLoading] = useState(true);
     const [data, setData] = useState([]);
     const [selected, setSelected] = useState(null);
     const [openDrawer, setOpenDrawer] = useState(false);
@@ -69,25 +69,41 @@ export default function Page() {
 
     /* ================= FETCH ================= */
     const fetchLeave = async (pageNumber = 1) => {
+
         try {
-            let statusFilter = tab === "requests"
-                ? "Pending"
-                : "Approved,Rejected";
+
+            setLoading(true);
+
+            let statusFilter =
+                tab === "requests"
+                    ? "Pending"
+                    : "Approved,Rejected";
 
             const res = await api.get(
                 `/leave?page=${pageNumber}&status=${statusFilter}`
             );
 
-            setData(res.data.data.data || []);
-            setMeta(res.data.data);
+            setData(
+                res.data.data.data || []
+            );
+
+            setMeta(
+                res.data.data
+            );
 
         } catch (err) {
+
             console.error(err);
+
             showToast({
                 title: "Error",
                 message: "Failed to fetch leave",
                 type: "error",
             });
+
+        } finally {
+
+            setLoading(false);
         }
     };
 
@@ -184,6 +200,7 @@ export default function Page() {
             {/* TABLE */}
             <LeaveTable
                 data={data}
+                loading={loading}
                 onView={handleView}
             />
 

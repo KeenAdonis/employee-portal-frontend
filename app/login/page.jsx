@@ -1,17 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 
+/* ✅ Static paths (no animation) */
+const PATHS = [
+  "M-200,400 C300,200 900,600 2000,300",
+  "M-200,450 C350,250 950,650 2000,350",
+  "M-200,520 C450,300 1000,700 2000,400",
+  "M-200,580 C500,350 1100,750 2000,450",
+];
+
 export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
 
-  const [loginType, setLoginType] = useState("employee"); // ✅ ADDED
-  const [employeeNo, setEmployeeNo] = useState(""); // ✅ ADDED
+  const [loginType, setLoginType] = useState("employee");
+  const [employeeNo, setEmployeeNo] = useState("");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,6 +30,13 @@ export default function LoginPage() {
 
   const [quotes, setQuotes] = useState([]);
   const [currentQuote, setCurrentQuote] = useState(0);
+
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mediaQuery.matches);
+  }, []);
 
   useEffect(() => {
     const fetchQuotes = async () => {
@@ -46,10 +61,12 @@ export default function LoginPage() {
 
     const interval = setInterval(() => {
       setCurrentQuote((prev) => (prev + 1) % quotes.length);
-    }, 4000);
+    }, 6000);
 
     return () => clearInterval(interval);
   }, [quotes]);
+
+  const quote = useMemo(() => quotes[currentQuote], [quotes, currentQuote]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -69,17 +86,12 @@ export default function LoginPage() {
       } else {
         router.push("/dashboard");
       }
-
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Invalid credentials"
-      );
+      setError(err.response?.data?.message || "Invalid credentials");
     } finally {
       setLoading(false);
     }
   };
-
-  const quote = quotes[currentQuote];
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#020617]">
@@ -87,61 +99,48 @@ export default function LoginPage() {
       {/* BACKGROUND */}
       <div className="absolute inset-0">
 
+        {/* Gradient animation (light lang, ok na) */}
         <motion.div
           className="absolute inset-0 bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e293b]"
-          animate={{
-            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-          }}
+          animate={
+            reducedMotion
+              ? {}
+              : {
+                backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+              }
+          }
           transition={{
-            duration: 20,
+            duration: 40,
             repeat: Infinity,
             ease: "linear",
           }}
         />
 
+        {/* Blur blobs (optimized) */}
         <div className="absolute inset-0">
-          <div className="absolute w-[500px] h-[500px] bg-amber-400/20 blur-[120px] rounded-full top-[-120px] left-[-120px]" />
-          <div className="absolute w-[400px] h-[400px] bg-pink-500/20 blur-[120px] rounded-full bottom-[-120px] right-[-120px]" />
+          <div className="absolute w-[500px] h-[500px] bg-amber-400/20 blur-[80px] rounded-full top-[-120px] left-[-120px]" />
+          <div className="absolute w-[400px] h-[400px] bg-pink-500/20 blur-[80px] rounded-full bottom-[-120px] right-[-120px]" />
         </div>
 
+        {/* ✅ STATIC SVG (NO animation at all) */}
         <svg
-          className="absolute inset-0 w-[120%] -left-[10%] h-full opacity-70 pointer-events-none"
+          className="absolute inset-0 w-[120%] -left-[10%] h-full opacity-60 pointer-events-none"
           viewBox="0 0 2000 800"
           preserveAspectRatio="none"
         >
-          {[
-            "M-200,400 C300,200 900,600 2000,300",
-            "M-200,450 C350,250 950,650 2000,350",
-            "M-200,520 C450,300 1000,700 2000,400",
-            "M-200,580 C500,350 1100,750 2000,450",
-          ].map((d, i) => (
-            <motion.path
+          {PATHS.map((d, i) => (
+            <path
               key={i}
               d={d}
               stroke={
                 i < 2
-                  ? "rgba(251,191,36,0.6)"
+                  ? "rgba(251,191,36,0.4)"
                   : i === 2
-                    ? "rgba(236,72,153,0.4)"
-                    : "rgba(59,130,246,0.3)"
+                    ? "rgba(236,72,153,0.25)"
+                    : "rgba(59,130,246,0.2)"
               }
-              strokeWidth={i === 0 ? 3 : 2}
+              strokeWidth={i === 0 ? 2 : 1.5}
               fill="none"
-              strokeDasharray="2000"
-              strokeDashoffset="2000"
-              style={{
-                filter: "drop-shadow(0 0 8px rgba(251,191,36,0.6))",
-              }}
-              animate={{
-                strokeDashoffset: [2000, 0, -2000],
-                opacity: [0, 1, 0],
-              }}
-              transition={{
-                duration: 6 + i * 1.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: i * 0.8,
-              }}
             />
           ))}
         </svg>
@@ -194,7 +193,7 @@ export default function LoginPage() {
               <img
                 src="/logo.png"
                 alt="Logo"
-                className="w-10 h-10 mx-auto mb-3 object-contain drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]"
+                className="w-20 h-20 mx-auto mb-3 object-contain drop-shadow-[0_0_6px_rgba(251,191,36,0.5)]"
               />
               <h2 className="text-2xl font-semibold text-gray-950">
                 Welcome Back!
@@ -204,14 +203,21 @@ export default function LoginPage() {
               </p>
             </div>
 
-            {/* 🔘 TOGGLE */}
-            <div className="flex mb-4 bg-gray-100 rounded-lg p-1">
+            {/* SWITCH */}
+            <div className="relative flex w-full mb-5 bg-[#0f172a] rounded-full p-1">
+              <div
+                className={`absolute top-1 bottom-1 w-1/2 rounded-full bg-white shadow-md transition-all duration-300 ${loginType === "employee"
+                    ? "left-1"
+                    : "left-[calc(50%-4px)]"
+                  }`}
+              />
+
               <button
                 type="button"
                 onClick={() => setLoginType("employee")}
-                className={`flex-1 py-1.5 text-sm rounded-md transition ${loginType === "employee"
-                  ? "bg-white shadow text-gray-900"
-                  : "text-gray-500"
+                className={`relative z-10 flex-1 py-2 text-sm font-medium ${loginType === "employee"
+                    ? "text-[#0f172a]"
+                    : "text-white/70"
                   }`}
               >
                 Employee
@@ -220,9 +226,9 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => setLoginType("admin")}
-                className={`flex-1 py-1.5 text-sm rounded-md transition ${loginType === "admin"
-                  ? "bg-white shadow text-gray-900"
-                  : "text-gray-500"
+                className={`relative z-10 flex-1 py-2 text-sm font-medium ${loginType === "admin"
+                    ? "text-[#0f172a]"
+                    : "text-white/70"
                   }`}
               >
                 Admin
@@ -237,40 +243,37 @@ export default function LoginPage() {
                 </div>
               )}
 
-              {/* 👨‍💼 Employee No */}
               {loginType === "employee" && (
                 <input
                   type="text"
                   placeholder="Employee No"
                   value={employeeNo}
                   onChange={(e) => setEmployeeNo(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-amber-300 focus:border-amber-300 outline-none transition"
+                  className="w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-amber-300 focus:border-amber-300 outline-none"
                 />
               )}
 
               <input
                 type="email"
-                aria-label="Email"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-amber-300 focus:border-amber-300 outline-none transition"
+                className="w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-amber-300 focus:border-amber-300 outline-none"
               />
 
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  aria-label="Password"
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border focus:ring-1 focus:ring-amber-300 focus:border-amber-300 outline-none pr-10 transition"
+                  className="w-full px-4 py-2 rounded-lg border pr-10 focus:ring-1 focus:ring-amber-300 focus:border-amber-300 outline-none"
                 />
 
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -281,16 +284,12 @@ export default function LoginPage() {
                   <input type="checkbox" />
                   Remember me
                 </label>
-
-                <button className="text-amber-500 hover:underline">
-                  Forgot password?
-                </button>
               </div>
 
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-[#0f172a] font-semibold shadow-lg shadow-amber-500/40 transition-all duration-200 disabled:opacity-60"
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 text-[#0f172a] font-semibold shadow-lg shadow-amber-500/30 disabled:opacity-60"
               >
                 {loading ? "Signing in..." : "Sign In"}
               </button>
@@ -298,7 +297,6 @@ export default function LoginPage() {
             </form>
 
           </div>
-
         </motion.div>
       </div>
     </div>

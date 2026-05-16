@@ -2,7 +2,8 @@
 
 import { X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 export default function Modal({
     open,
@@ -13,13 +14,21 @@ export default function Modal({
     footer,
 }) {
 
+    const [mounted, setMounted] = useState(false);
+
+    // ✅ Fix hydration issue
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     // 🔒 Prevent background scroll
     useEffect(() => {
+        if (!mounted) return;
         document.body.style.overflow = open ? "hidden" : "auto";
         return () => {
             document.body.style.overflow = "auto";
         };
-    }, [open]);
+    }, [open, mounted]);
 
     // ⌨️ Close on ESC
     useEffect(() => {
@@ -30,10 +39,13 @@ export default function Modal({
         return () => document.removeEventListener("keydown", handleEsc);
     }, [onClose]);
 
-    return (
+    // ❗ Prevent SSR mismatch
+    if (!mounted) return null;
+
+    return createPortal(
         <AnimatePresence>
             {open && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center">
 
                     {/* OVERLAY */}
                     <motion.div
@@ -52,7 +64,7 @@ export default function Modal({
                         exit={{ opacity: 0, scale: 0.97, y: 10 }}
                         transition={{
                             duration: 0.18,
-                            ease: [0.22, 1, 0.36, 1], // ✨ snappy cubic-bezier
+                            ease: [0.22, 1, 0.36, 1],
                         }}
                         className="relative z-10 w-full max-w-3xl mx-4"
                     >
@@ -60,13 +72,13 @@ export default function Modal({
 
                             {/* HEADER */}
                             <div className="flex items-start justify-between px-6 py-4 border-b">
-                                <div className="flex flex-col">
+                                <div>
                                     <h2 className="text-lg font-semibold text-gray-900">
                                         {title}
                                     </h2>
 
                                     {subtitle && (
-                                        <p className="text-sm text-gray-500 mt-1 leading-tight">
+                                        <p className="text-sm text-gray-500 mt-1">
                                             {subtitle}
                                         </p>
                                     )}
@@ -74,7 +86,7 @@ export default function Modal({
 
                                 <button
                                     onClick={onClose}
-                                    className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100 transition"
+                                    className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-gray-100"
                                 >
                                     <X className="w-5 h-5" />
                                 </button>
@@ -87,7 +99,7 @@ export default function Modal({
 
                             {/* FOOTER */}
                             {footer && (
-                                <div className="px-6 py-4 border-t bg-gray-50 flex justify-end gap-2 rounded-b-2xl">
+                                <div className="px-6 py-4 border-t bg-gray-50 flex justify-end gap-2">
                                     {footer}
                                 </div>
                             )}
@@ -95,6 +107,7 @@ export default function Modal({
                     </motion.div>
                 </div>
             )}
-        </AnimatePresence>
+        </AnimatePresence>,
+        document.body
     );
 }

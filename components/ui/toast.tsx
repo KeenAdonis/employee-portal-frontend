@@ -42,6 +42,7 @@ export default function Toast({ toast, onClose }: ToastProps) {
   return (
     <div
       className={`
+        pointer-events-auto
         w-[320px] border rounded-lg shadow-lg p-4
         flex gap-3 items-start backdrop-blur-sm
         ${variant.bg}

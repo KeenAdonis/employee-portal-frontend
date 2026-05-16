@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Sidebar from "./Sidebar";
-import Topbar from "./Topbar";
+import Topbar from "@/components/layout/Topbar";
+
 
 export default function DashboardShell({ user, menu, children }) {
   const [collapsed, setCollapsed] = useState(false);

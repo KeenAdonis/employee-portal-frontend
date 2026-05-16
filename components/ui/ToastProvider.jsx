@@ -1,12 +1,18 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Toast from "@/components/ui/toast";
 
 const ToastContext = createContext();
 
 export function ToastProvider({ children }) {
     const [toasts, setToasts] = useState([]);
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const showToast = ({
         title,
@@ -16,22 +22,19 @@ export function ToastProvider({ children }) {
     }) => {
         const id = Date.now();
 
-        // 1. ADD as hidden
         setToasts((prev) => [
             ...prev,
             { id, title, message, type, visible: false },
         ]);
 
-        // 2. TRIGGER enter animation (important delay)
         setTimeout(() => {
             setToasts((prev) =>
                 prev.map((t) =>
                     t.id === id ? { ...t, visible: true } : t
                 )
             );
-        }, 50); // 👈 maliit delay para mag-render muna
+        }, 50);
 
-        // 3. EXIT animation
         setTimeout(() => {
             setToasts((prev) =>
                 prev.map((t) =>
@@ -39,7 +42,6 @@ export function ToastProvider({ children }) {
                 )
             );
 
-            // 4. REMOVE after animation
             setTimeout(() => {
                 removeToast(id);
             }, 300);
@@ -54,15 +56,20 @@ export function ToastProvider({ children }) {
         <ToastContext.Provider value={{ showToast }}>
             {children}
 
-            <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-3">
-                {toasts.map((t) => (
-                    <Toast
-                        key={t.id}
-                        toast={t}
-                        onClose={() => removeToast(t.id)}
-                    />
-                ))}
-            </div>
+            {/* ✅ Portal */}
+            {mounted &&
+                createPortal(
+                    <div className="fixed top-5 right-5 z-[99999] flex flex-col gap-3 pointer-events-none">
+                        {toasts.map((t) => (
+                            <Toast
+                                key={t.id}
+                                toast={t}
+                                onClose={() => removeToast(t.id)}
+                            />
+                        ))}
+                    </div>,
+                    document.body
+                )}
         </ToastContext.Provider>
     );
 }

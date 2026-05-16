@@ -80,13 +80,36 @@ export default function EmployeeCard({ employee, onView }) {
         {/* AVATAR */}
         <div
           className={`
-            w-16 h-16 rounded-full mb-3
-            flex items-center justify-center
-            text-white font-semibold text-lg
+            w-16
+            h-16
+            rounded-full
+            mb-3
+            overflow-hidden
+            flex
+            items-center
+            justify-center
+            text-white
+            font-semibold
+            text-lg
+            shadow-sm
             ${getColor(fullName)}
           `}
         >
-          {getInitials(employee.FirstName, employee.LastName)}
+          
+          {employee.ProfileImage ? (
+          
+            <img
+              src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/storage/${employee.ProfileImage}`}
+              alt={fullName}
+              className="w-full h-full object-cover"
+            />
+          
+          ) : (
+          
+            getInitials(employee.FirstName, employee.LastName)
+          
+          )}
+        
         </div>
 
         <h2 className="font-semibold text-gray-900 text-sm">

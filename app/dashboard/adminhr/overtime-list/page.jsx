@@ -16,7 +16,7 @@ import api from "@/services/api";
 import { DownloadCloud } from "lucide-react";
 
 export default function Page() {
-
+    const [loading, setLoading] = useState(true);
     const [data, setData] = useState([]);
     const [selected, setSelected] = useState(null);
     const [openDrawer, setOpenDrawer] = useState(false);
@@ -39,6 +39,9 @@ export default function Page() {
 
     const fetchOvertime = async (pageNumber = 1) => {
         try {
+
+            setLoading(true);
+
             let statusFilter = tab === "requests"
                 ? "Pending,Pre-Approved"
                 : "Approved,Rejected";
@@ -57,6 +60,9 @@ export default function Page() {
                 message: "Failed to fetch overtime",
                 type: "error",
             });
+        } finally {
+
+            setLoading(false);
         }
     };
 
@@ -214,6 +220,7 @@ export default function Page() {
 
             <OvertimeTable
                 data={data}
+                loading={loading}
                 onView={handleView}
             />
 

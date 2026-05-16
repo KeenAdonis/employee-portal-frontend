@@ -6,24 +6,71 @@
 
 @layer base {
   :root {
-  --background: 0 0% 100%;
-  --foreground: 240 10% 3.9%;
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
 
-  --primary: 262 83% 58%; /* 🔥 purple */
-  --primary-foreground: 0 0% 100%;
+    --primary: 262 83% 58%;
+    /* 🔥 purple */
+    --primary-foreground: 0 0% 100%;
 
-  --secondary: 240 4.8% 95.9%;
-  --secondary-foreground: 240 5.9% 10%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
 
-  --muted: 240 4.8% 95.9%;
-  --muted-foreground: 240 3.8% 46.1%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
 
-  --border: 240 5.9% 90%;
-  --input: 240 5.9% 90%;
-  --ring: 262 83% 58%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 262 83% 58%;
 
-  --radius: 0.75rem;
-}
+    --radius: 0.75rem;
+  }
+
+  /* === FULLY HIDDEN SIDEBAR SCROLLBAR === */
+
+  .sidebar-scroll {
+    -ms-overflow-style: none;
+    /* IE / old Edge */
+    scrollbar-width: none;
+    /* Firefox */
+  }
+
+  .sidebar-scroll::-webkit-scrollbar {
+    display: none;
+    /* Chrome / Safari */
+  }
+
+  /* =========================================================
+   ENTERPRISE INVISIBLE SCROLLBAR
+========================================================= */
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+  }
+
+  /* Chrome / Edge / Safari */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  /* REMOVE TRACK */
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* FLOATING THUMB */
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    border: none;
+  }
+
+  /* HOVER */
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.24);
+  }
+
 
   .dark {
     --background: oklch(0.145 0 0);

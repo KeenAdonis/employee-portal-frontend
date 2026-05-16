@@ -6,7 +6,7 @@ import EditEmployeeModal from "@/components/adminhr/EditEmployeeModal";
 import EmployeeCard from "@/components/adminhr/EmployeeCard";
 import { Button } from "@/components/ui/button";
 import api from "@/services/api";
-import { Hourglass, Pencil, PlusCircle, ShieldCheck } from "lucide-react";
+import { Hourglass, Pencil, PlusCircle, ShieldCheck, UserX } from "lucide-react";
 import Drawer from "@/components/ui/Drawer";
 import { useToast } from "@/components/ui/ToastProvider";
 
@@ -85,17 +85,14 @@ export default function EmployeeListPage() {
         try {
             setActionLoading(true);
 
-            // 🔥 SHOW PROCESSING FIRST
             showToast({
                 title: "Processing your request",
-                message: "Please wait while we sync your data. This may take a few moments.",
+                message: "Please wait while we sync your data.",
                 type: "info",
-                duration: 6000, // optional auto-hide
             });
 
             await api.post(`/employees/${selected.EmployeeNo}/send-password`);
 
-            // ✅ SUCCESS
             showToast({
                 title: "Email Sent",
                 message: "Temporary password has been sent successfully.",
@@ -105,20 +102,14 @@ export default function EmployeeListPage() {
         } catch (err) {
             console.error("Send password error:", err);
 
-            const status = err.response?.status;
-            const message = err.response?.data?.message;
-
             showToast({
                 title: "Error",
-                message:
-                    message ||
-                    (status === 403
-                        ? "Unauthorized action"
-                        : status === 500
-                            ? "Server error"
-                            : "Failed to send temporary password"),
+                message: "Failed to send temporary password",
                 type: "error",
             });
+
+        } finally {
+            setActionLoading(false); // ✅ THIS IS MISSING
         }
     };
 
@@ -168,6 +159,51 @@ export default function EmployeeListPage() {
         }
     };
 
+    const handleToggleSurveyEligibility = async () => {
+
+        try {
+
+            setActionLoading(true);
+
+            await api.put(
+                `/employees/${selected.EmployeeNo}/toggle-survey-eligibility`
+            );
+
+            const updatedValue =
+                !selected.IsSurveyExcluded;
+
+            setSelected((prev) => ({
+                ...prev,
+                IsSurveyExcluded: updatedValue,
+            }));
+
+            fetchEmployees(search);
+
+            showToast({
+                title: "Updated",
+                message: updatedValue
+                    ? "Employee excluded from surveys."
+                    : "Employee can now participate in surveys.",
+                type: "success",
+            });
+
+        } catch (err) {
+
+            console.error(err);
+
+            showToast({
+                title: "Error",
+                message: "Failed to update survey eligibility.",
+                type: "error",
+            });
+
+        } finally {
+
+            setActionLoading(false);
+
+        }
+    };
+
     /* =========================
        INITIAL LOAD
     ========================= */
@@ -190,23 +226,39 @@ export default function EmployeeListPage() {
        DOWNLOAD CSV
     ========================= */
     const handleDownload = async () => {
+
+        if (typeof window === "undefined") return;
+
         try {
+
             const res = await api.get(
                 `/employees/export?search=${search}`,
                 {
-                    responseType: "blob", // 🔥 IMPORTANT
+                    responseType: "blob",
                 }
             );
 
-            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const url = window.URL.createObjectURL(
+                new Blob([res.data])
+            );
+
             const a = document.createElement("a");
+
             a.href = url;
             a.download = "employees.csv";
+
+            document.body.appendChild(a);
+
             a.click();
+
+            a.remove();
+
             window.URL.revokeObjectURL(url);
 
         } catch (err) {
+
             console.error("Download failed:", err);
+
         }
     };
 
@@ -325,6 +377,7 @@ export default function EmployeeListPage() {
                             selected={selected}
                             onToggleStatus={handleToggleStatus}
                             onSendPassword={handleSendPassword}
+                            onToggleSurveyEligibility={handleToggleSurveyEligibility}
                             onEdit={handleEdit}
                             actionLoading={actionLoading}
                         />
@@ -354,6 +407,7 @@ function Info({ label, value }) {
 function EmployeeDrawerContent({
     selected,
     onToggleStatus,
+    onToggleSurveyEligibility,
     onSendPassword,
     onEdit,
     actionLoading,
@@ -464,7 +518,7 @@ function EmployeeDrawerContent({
                                 >
                                     {actionLoading ? (
                                         <>
-                                            <span className="animate-spin">⏳</span>
+                                            <span className="animate-spin"><Hourglass size={12} /></span>
                                             <span>Sending...</span>
                                         </>
                                     ) : (
@@ -476,6 +530,37 @@ function EmployeeDrawerContent({
                                 </button>
 
                                 <div className="border-t my-2"></div>
+
+                                {/* EXCLUDED STATUS */}
+                                <button
+                                    onClick={() => {
+                                        setMenuOpen(false);
+                                        onToggleSurveyEligibility();
+                                    }}
+                                    disabled={actionLoading}
+                                    className="
+                                        w-full flex items-center gap-2
+                                        px-3 py-2 text-left
+                                        hover:bg-gray-100
+                                        rounded-lg
+                                        disabled:opacity-50
+                                    "
+                                >
+
+                                    <UserX
+                                        size={14}
+                                        className="
+                                            text-amber-500
+                                        "
+                                    />
+
+                                    <span>
+                                        {selected.IsSurveyExcluded
+                                            ? "Enable Survey Participation"
+                                            : "Exclude From Surveys"}
+                                    </span>
+
+                                </button>
 
                                 {/* TOGGLE STATUS */}
                                 <button
