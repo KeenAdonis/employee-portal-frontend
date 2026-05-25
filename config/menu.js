@@ -22,7 +22,7 @@ export const menuByRole = {
   /* =========================
      ADMIN (SUPER ADMIN)
   ========================= */
-  admin: [
+  adminsuper: [
     {
       section: "General",
       items: [
@@ -36,9 +36,10 @@ export const menuByRole = {
     {
       section: "Management",
       items: [
+
         {
-          label: "Employees",
-          href: "/dashboard/employees",
+          label: "Users",
+          href: "/dashboard/admin/user-list",
           icon: <Users size={18} />,
         },
         {
@@ -82,6 +83,11 @@ export const menuByRole = {
           href: "/dashboard/employee/profile",
           icon: <User size={18} />,
         },
+        {
+          label: "My Payslip",
+          href: "/dashboard/employee/payslip",
+          icon: <Wallet size={18} />,
+        },
       ],
     },
     {
@@ -121,6 +127,12 @@ export const menuByRole = {
           label: "Travel Itinerary",
           href: "/dashboard/employee/travel",
           icon: <Car size={18} />,
+        },
+
+        {
+          label: "Daily Time Record",
+          href: "/dashboard/employee/dtr",
+          icon: <ClipboardClock size={18} />,
         },
       ],
     },
@@ -168,6 +180,7 @@ export const menuByRole = {
     {
       section: "Finance",
       items: [
+        /*============ DISABLE FOR NOW ==============
         {
           label: "Finance Management",
           href: "/dashboard/adminhr/requisition-list",
@@ -178,6 +191,10 @@ export const menuByRole = {
           href: "/dashboard/adminhr/liquidation-list",
           icon: <Receipt size={18} />,
         },
+        */
+
+
+
         {
           label: "Payroll",
           href: "/dashboard/adminhr/payroll-list",

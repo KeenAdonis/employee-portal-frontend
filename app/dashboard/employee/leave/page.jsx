@@ -8,11 +8,13 @@ import CreateLeaveModal from "@/components/employee/CreateLeaveModal";
 import Drawer from "@/components/ui/Drawer";
 import Pagination from "@/components/table/Pagination";
 import StatusBadge from "@/components/ui/StatusBadge";
-import Tabs from "@/components/ui/Tabs";
+import Input from "@/components/ui/Input";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 import { formatDate } from "@/lib/format";
-
 import { useToast } from "@/components/ui/ToastProvider";
+
+import { leaveStatusOptions } from "@/config/options";
 
 import api from "@/services/api";
 
@@ -28,10 +30,13 @@ export default function Page() {
     const [data, setData] = useState([]);
     const [meta, setMeta] = useState(null);
     const [page, setPage] = useState(1);
-    const [tab, setTab] = useState("pending");
     const [selected, setSelected] = useState(null);
     const [openDrawer, setOpenDrawer] = useState(false);
     const [openCreate, setOpenCreate] = useState(false);
+
+    const [search, setSearch] = useState("");
+    const [selectedStatus, setSelectedStatus] = useState("all");
+    const [debouncedSearch, setDebouncedSearch] = useState(search);
 
     /* =========================
        FETCH LEAVE
@@ -44,18 +49,21 @@ export default function Page() {
 
             setLoading(true);
 
-            let statusFilter = "Pending";
+            const params = {
+                page: pageNumber,
+            };
 
-            if (tab === "approved") {
-                statusFilter = "Approved";
+            if (debouncedSearch.trim()) {
+                params.search = debouncedSearch;
             }
 
-            if (tab === "rejected") {
-                statusFilter = "Rejected";
+            if (selectedStatus !== "all") {
+                params.status = selectedStatus;
             }
 
             const res = await api.get(
-                `/leave?page=${pageNumber}&status=${statusFilter}`
+                "/leave",
+                { params }
             );
 
             setData(
@@ -113,15 +121,27 @@ export default function Page() {
     ========================= */
     useEffect(() => {
 
-        fetchLeave(page);
+        const timer = setTimeout(() => {
 
-    }, [page, tab]);
+            setDebouncedSearch(search);
+
+        }, 400);
+
+        return () => clearTimeout(timer);
+
+    }, [search]);
 
     useEffect(() => {
 
         setPage(1);
 
-    }, [tab]);
+    }, [debouncedSearch, selectedStatus]);
+
+    useEffect(() => {
+
+        fetchLeave(page);
+
+    }, [page, debouncedSearch, selectedStatus]);
 
     return (
 
@@ -130,70 +150,83 @@ export default function Page() {
             {/* =========================
                 HEADER
             ========================= */}
-            <div className="
-                flex flex-col gap-4
-                lg:flex-row lg:items-center lg:justify-between
-            ">
-
+            <div
+                className="
+                    flex
+                    flex-col
+                    xl:flex-row
+                    xl:items-center
+                    xl:justify-between
+                    gap-4
+                "
+            >
+                        
                 {/* LEFT */}
-                <div>
-
-                    <h1 className="text-2xl font-bold text-gray-900">
-                        Leave Requests
-                    </h1>
-
-                    <p className="text-sm text-gray-500 mt-1">
-                        Manage and track your leave applications.
-                    </p>
-
+                <div
+                    className="
+                        flex
+                        flex-col
+                        lg:flex-row
+                        lg:items-center
+                        gap-3
+                    "
+                >
+                
+                    {/* SEARCH */}
+                    <div className="w-[280px]">
+                        
+                        <Input
+                            value={search}
+                            onChange={(e) =>
+                                setSearch(e.target.value)
+                            }
+                            placeholder="Search leave..."
+                        />
+            
+                    </div>
+                        
+                    {/* STATUS FILTER */}
+                    <div className="w-[220px]">
+                        
+                        <CustomSelect
+                            value={selectedStatus}
+                            onChange={setSelectedStatus}
+                            options={leaveStatusOptions}
+                            placeholder="Filter Status"
+                        />
+            
+                    </div>
+                        
                 </div>
-
+                        
                 {/* RIGHT */}
                 <button
                     onClick={() =>
                         setOpenCreate(true)
                     }
                     className="
-                        inline-flex items-center gap-2
-                        bg-indigo-600 hover:bg-indigo-700
-                        text-white text-sm font-medium
-                        px-5 h-11 rounded-xl
+                        inline-flex
+                        items-center
+                        gap-2
+                        bg-indigo-600
+                        hover:bg-indigo-700
+                        text-white
+                        text-sm
+                        font-medium
+                        px-5
+                        h-11
+                        rounded-xl
                         transition
+                        whitespace-nowrap
                     "
                 >
-
+                
                     <Plus className="w-4 h-4" />
-
+                
                     New Leave
-
+                
                 </button>
-
-            </div>
-
-            {/* =========================
-                TABS
-            ========================= */}
-            <div className="flex items-center justify-between">
-
-                <Tabs
-                    value={tab}
-                    onChange={setTab}
-                    options={[
-                        {
-                            label: "Pending",
-                            value: "pending",
-                        },
-                        {
-                            label: "Approved",
-                            value: "approved",
-                        },
-                        {
-                            label: "Rejected",
-                            value: "rejected",
-                        },
-                    ]}
-                />
-
+                
             </div>
 
             {/* =========================

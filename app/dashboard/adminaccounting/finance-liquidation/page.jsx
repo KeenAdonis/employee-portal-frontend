@@ -6,17 +6,38 @@ import Drawer from "@/components/ui/Drawer";
 import Modal from "@/components/ui/Modal";
 import Pagination from "@/components/table/Pagination";
 import { useToast } from "@/components/ui/ToastProvider";
+import CustomSelect from "@/components/ui/CustomSelect";
+import { Button } from "@/components/ui/button";
+import Input from "@/components/ui/Input";
+import CustomDatePicker from "@/components/ui/CustomDatePicker";
 import { useActionState } from "@/lib/useActionState";
 import { formatCurrency } from "@/lib/format";
 import api from "@/services/api";
+
+import {
+    liquidationStatusOptions
+} from "@/config/options";
+
+import {
+    DownloadCloud
+} from "lucide-react";
 
 export default function AccountingLiquidationPage() {
 
     const [data, setData] = useState([]);
     const [meta, setMeta] = useState(null);
+
+    const [search, setSearch] = useState("");
+    const [selectedStatus, setSelectedStatus] = useState("all");
     const [page, setPage] = useState(1);
 
     const [selected, setSelected] = useState(null);
+    const [downloadOpen, setDownloadOpen] = useState(false);
+    const [downloadStatus, setDownloadStatus] = useState("all");
+
+    const [fromDate, setFromDate] = useState("");
+
+    const [toDate, setToDate] = useState("");
     const [openDrawer, setOpenDrawer] = useState(false);
 
     const [rejectOpen, setRejectOpen] = useState(false);
@@ -29,6 +50,7 @@ export default function AccountingLiquidationPage() {
 
     const approveAction = useActionState();
     const rejectAction = useActionState();
+    const downloadAction = useActionState();
 
     /* ================= FETCH ================= */
     const fetchLiquidations = async (pageNumber = 1) => {
@@ -37,8 +59,21 @@ export default function AccountingLiquidationPage() {
 
         try {
 
+            const params = {
+                page: pageNumber,
+            };
+
+            if (search.trim()) {
+                params.search = search;
+            }
+
+            if (selectedStatus !== "all") {
+                params.status = selectedStatus;
+            }
+
             const res = await api.get(
-                `/liquidations?page=${pageNumber}`
+                "/liquidations",
+                { params }
             );
 
             // Backend na magfi-filter (Pending only for accounting)
@@ -55,6 +90,84 @@ export default function AccountingLiquidationPage() {
 
         } finally {
             setLoadingList(false);
+        }
+    };
+
+    const handleDownload = async () => {
+
+        if (!fromDate || !toDate) {
+
+            showToast({
+                title: "Warning",
+                message:
+                    "Please select date range",
+                type: "warning",
+            });
+
+            return;
+        }
+
+        try {
+
+            const response = await api.get(
+                "/liquidations/export",
+                {
+                    params: {
+                        from: fromDate,
+                        to: toDate,
+
+                        search,
+
+                        status:
+                            downloadStatus !== "all"
+                                ? downloadStatus
+                                : undefined,
+                    },
+
+                    responseType: "blob",
+                }
+            );
+
+            const url =
+                window.URL.createObjectURL(
+                    new Blob([response.data])
+                );
+
+            const link =
+                document.createElement("a");
+
+            link.href = url;
+
+            link.setAttribute(
+                "download",
+                "liquidation-report.xlsx"
+            );
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            link.remove();
+
+            window.URL.revokeObjectURL(url);
+
+            setDownloadOpen(false);
+
+            showToast({
+                title: "Success",
+                message:
+                    "Liquidation report downloaded",
+                type: "success",
+            });
+
+        } catch {
+
+            showToast({
+                title: "Error",
+                message:
+                    "Failed to export report",
+                type: "error",
+            });
         }
     };
 
@@ -93,8 +206,12 @@ export default function AccountingLiquidationPage() {
 
             let status = "Rejected";
 
+            if (type === "check") {
+                status = "Checked";
+            }
+
             if (type === "approve") {
-                status = "Checked"; // 🔥 Accounting role
+                status = "Approved";
             }
 
             await api.put(
@@ -149,10 +266,85 @@ export default function AccountingLiquidationPage() {
     /* ================= EFFECT ================= */
     useEffect(() => {
         fetchLiquidations(page);
-    }, [page]);
+    }, [page, search, selectedStatus]);
 
     return (
         <div className="p-6 space-y-4">
+
+            {/* HEADER */}
+            <div className="
+                mb-4
+                flex
+                items-center
+                justify-between
+                gap-4
+            ">
+
+                {/* TITLE */}
+                <h2 className="
+                    text-2xl
+                    font-semibold
+                    text-gray-900
+                ">
+                    Liquidation Requests
+                </h2>
+
+                {/* ACTIONS */}
+                <div className="flex items-center gap-3">
+
+                    {/* SEARCH */}
+                    <div className="w-[280px]">
+
+                        <Input
+                            value={search}
+                            onChange={(e) =>
+                                setSearch(e.target.value)
+                            }
+                            placeholder="Search liquidation..."
+                        />
+
+                    </div>
+
+                    {/* STATUS FILTER */}
+                    <div className="w-[220px]">
+
+                        <CustomSelect
+                            value={selectedStatus}
+                            onChange={setSelectedStatus}
+                            options={liquidationStatusOptions}
+                            placeholder="Filter Status"
+                        />
+
+                    </div>
+
+                    {/* DOWNLOAD */}
+                    <Button
+                        onClick={() =>
+                            setDownloadOpen(true)
+                        }
+
+                        className="
+                            bg-green-600
+                            text-white
+                            px-4
+                            py-2
+                            rounded-xl
+                            text-sm
+                            hover:bg-green-700
+                            transition
+                            flex
+                            items-center
+                            gap-2
+                            whitespace-nowrap
+                        "
+                    >
+                        <DownloadCloud size={14} />
+                        <span>Download</span>
+                    </Button>
+
+                </div>
+
+            </div>
 
             {/* ================= TABLE ================= */}
             <LiquidationTable
@@ -183,7 +375,7 @@ export default function AccountingLiquidationPage() {
                             <button
                                 onClick={() =>
                                     approveAction.run(() =>
-                                        handleAction("approve")
+                                        handleAction("check")
                                     )
                                 }
                                 disabled={approveAction.loading}
@@ -196,6 +388,35 @@ export default function AccountingLiquidationPage() {
                                 {approveAction.loading
                                     ? "Processing..."
                                     : "Check"}
+                            </button>
+
+                            {/* APPROVE BUTTON */}
+                            <button
+                                onClick={() =>
+                                    approveAction.run(() =>
+                                        handleAction("approve")
+                                    )
+                                }
+                            
+                                disabled={approveAction.loading}
+                            
+                                className={`
+                                    flex-1
+                                    h-12
+                                    rounded-sm
+                                    font-semibold
+                                
+                                    ${approveAction.loading
+                                        ? "bg-gray-200 text-gray-500"
+                                        : "bg-green-600 text-white hover:bg-green-700"
+                                    }
+                                `}
+                            >
+                                {
+                                    approveAction.loading
+                                        ? "Processing..."
+                                        : "Approve"
+                                }
                             </button>
 
                             {/* REJECT BUTTON */}
@@ -301,6 +522,130 @@ export default function AccountingLiquidationPage() {
                     </div>
 
                 )}
+
+            </Drawer>
+
+            <Drawer
+                open={downloadOpen}
+
+                onClose={() =>
+                    setDownloadOpen(false)
+                }
+
+                title="Download Liquidation Report"
+
+                footer={
+
+                    <div className="w-full flex gap-3">
+
+                        <button
+                            onClick={() =>
+                                setDownloadOpen(false)
+                            }
+
+                            className="
+                                flex-1
+                                py-3
+                                border
+                                rounded-xl
+                            "
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            onClick={() =>
+                                downloadAction.run(
+                                    handleDownload
+                                )
+                            }
+
+                            disabled={downloadAction.loading}
+
+                            className={`
+                                flex-1
+                                py-3
+                                rounded-xl
+                                text-white
+                                transition
+                            
+                                ${downloadAction.loading
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-green-600 hover:bg-green-700"
+                                }
+                            `}
+                        >
+                            {
+                                downloadAction.loading
+                                    ? "Downloading..."
+                                    : "Download"
+                            }
+                        </button>
+
+                    </div>
+                }
+            >
+
+                <div className="border rounded-2xl p-5 space-y-4">
+
+                    <div>
+                        <h3 className="text-sm font-semibold">
+                            Date Range
+                        </h3>
+
+                        <p className="text-xs text-gray-500">
+                            Select report coverage
+                        </p>
+                    </div>
+
+                    <div className="space-y-2">
+
+                        <label className="text-sm font-medium">
+                            Status
+                        </label>
+
+                        <CustomSelect
+                            value={downloadStatus}
+                            onChange={setDownloadStatus}
+                            options={
+                                liquidationStatusOptions
+                            }
+                            placeholder="Select Status"
+                        />
+
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+
+                        <div className="space-y-1">
+
+                            <label className="text-xs text-gray-500">
+                                From
+                            </label>
+
+                            <CustomDatePicker
+                                value={fromDate}
+                                onChange={setFromDate}
+                            />
+
+                        </div>
+
+                        <div className="space-y-1">
+
+                            <label className="text-xs text-gray-500">
+                                To
+                            </label>
+
+                            <CustomDatePicker
+                                value={toDate}
+                                onChange={setToDate}
+                            />
+
+                        </div>
+
+                    </div>
+
+                </div>
 
             </Drawer>
 

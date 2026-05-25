@@ -251,13 +251,6 @@ export default function EmployeeSurveyPage() {
                             <div className="flex gap-2">
 
                                 <Button
-                                    variant="outline"
-                                    className="rounded-xl"
-                                >
-                                    Export Reports
-                                </Button>
-
-                                <Button
                                     onClick={() => setOpenCreateModal(true)}
                                     className="
                                             bg-gradient-to-r

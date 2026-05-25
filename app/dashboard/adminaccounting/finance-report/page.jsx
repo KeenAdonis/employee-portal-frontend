@@ -1,20 +1,21 @@
 "use client";
 
+import { useState } from "react";
+
 import ReportsHeader from "@/components/adminaccounting/ReportsHeader";
-
 import LiquidationSummaryGrid from "@/components/adminaccounting/LiquidationSummaryGrid";
-
 import ApprovedAmountsByType from "@/components/adminaccounting/ApprovedAmountsByType";
-
 import MonthlyTrendChart from "@/components/adminaccounting/MonthlyTrendChart";
-
 import FinancialSummaryTable from "@/components/adminaccounting/FinancialSummaryTable";
-
 import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
-
 import useAccountingReportsData from "@/utils/useAccountingReportsData";
 
 export default function Page() {
+
+    const [selectedYear, setSelectedYear] =
+        useState(
+            new Date().getFullYear()
+        );
 
     /*
     |--------------------------------------------------------------------------
@@ -24,16 +25,16 @@ export default function Page() {
     const {
 
         loading,
-
         approvedAmounts,
-
         liquidationSummary,
-
         monthlyTrend,
-
         financialSummary,
 
-    } = useAccountingReportsData();
+    } = useAccountingReportsData(
+        selectedYear
+    );
+
+
 
     /*
     |--------------------------------------------------------------------------
@@ -83,6 +84,14 @@ export default function Page() {
                     monthlyTrend
                 }
                 loading={loading}
+
+                selectedYear={
+                    selectedYear
+                }
+
+                setSelectedYear={
+                    setSelectedYear
+                }
             />
 
             {/* FINANCIAL SUMMARY TABLE */}

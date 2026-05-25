@@ -15,6 +15,7 @@ import {
 import StatusBadge from "@/components/ui/StatusBadge";
 
 import { getInitials } from "@/lib/utils";
+import { getStorageUrl } from "@/lib/storage";
 
 export default function OvertimeTable({
     data = [],
@@ -39,29 +40,32 @@ export default function OvertimeTable({
             loading={loading}
             emptyTitle="No overtime requests found"
             emptyDescription="There are currently no overtime records available."
-            renderRow={(item) => (
+            renderRow={(item) => {
+                const profileImage = getStorageUrl(item.employee?.ProfileImage);
 
-                <tr
-                    key={item.id}
-                    className="
+                return (
+
+                    <tr
+                        key={item.id}
+                        className="
                         hover:bg-gray-50
                         transition-colors
                     "
-                >
+                    >
 
-                    {/* DATE FILED */}
-                    <td className="px-4 py-3">
-                        {formatDate(item.DateFiled)}
-                    </td>
+                        {/* DATE FILED */}
+                        <td className="px-4 py-3">
+                            {formatDate(item.DateFiled)}
+                        </td>
 
-                    {/* EMPLOYEE */}
-                    <td className="px-4 py-3">
+                        {/* EMPLOYEE */}
+                        <td className="px-4 py-3">
 
-                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3">
 
-                            {/* AVATAR */}
-                            <div
-                                className="
+                                {/* AVATAR */}
+                                <div
+                                    className="
                                     w-10
                                     h-10
                                     rounded-full
@@ -78,85 +82,81 @@ export default function OvertimeTable({
                                     shadow-sm
                                     shrink-0
                                 "
-                            >
+                                >
 
-                                {item.employee?.ProfileImage ? (
+                                    {profileImage ? (
 
-                                    <img
-                                        src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/storage/${item.employee.ProfileImage}`}
-                                        alt={item.EmployeeName}
+                                        <img
+                                            src={profileImage}
+                                            alt={item.EmployeeName}
+                                            className="w-full h-full object-cover"
+                                        />
+
+                                    ) : (
+
+                                        getInitials(item.EmployeeName, "")
+
+                                    )}
+
+                                </div>
+
+                                {/* INFO */}
+                                <div className="min-w-0">
+
+                                    <div
                                         className="
-                                            w-full
-                                            h-full
-                                            object-cover
-                                        "
-                                    />
-
-                                ) : (
-
-                                    getInitials(item.EmployeeName)
-
-                                )}
-
-                            </div>
-
-                            {/* INFO */}
-                            <div className="min-w-0">
-
-                                <div
-                                    className="
                                         font-medium
                                         text-gray-900
                                         truncate
                                     "
-                                >
-                                    {item.EmployeeName}
-                                </div>
+                                    >
+                                        {item.EmployeeName}
+                                    </div>
 
-                                <div
-                                    className="
+                                    <div
+                                        className="
                                         text-xs
                                         text-gray-500
                                         truncate
                                     "
-                                >
-                                    {item.employee?.Position || "—"}
+                                    >
+                                        {item.employee?.Position || "—"}
+                                    </div>
+
                                 </div>
 
                             </div>
 
-                        </div>
+                        </td>
 
-                    </td>
+                        {/* OT DATE */}
+                        <td className="px-4 py-3">
+                            {formatDate(item.OvertimeDate)}
+                        </td>
 
-                    {/* OT DATE */}
-                    <td className="px-4 py-3">
-                        {formatDate(item.OvertimeDate)}
-                    </td>
+                        {/* HOURS */}
+                        <td className="px-4 py-3">
+                            {formatHours(item.TotalHours)}
+                        </td>
 
-                    {/* HOURS */}
-                    <td className="px-4 py-3">
-                        {formatHours(item.TotalHours)}
-                    </td>
+                        {/* STATUS */}
+                        <td className="px-4 py-3">
 
-                    {/* STATUS */}
-                    <td className="px-4 py-3">
+                            <StatusBadge
+                                status={item.Status}
+                            />
 
-                        <StatusBadge
-                            status={item.Status}
-                        />
+                        </td>
 
-                    </td>
+                        {/* ACTIONS */}
+                        <td className="px-4 py-3">
 
-                    {/* ACTIONS */}
-                    <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
 
-                        <div className="flex items-center gap-2">
-
-                            {/* VIEW */}
-                            <button
-                                onClick={() => onView(item)}
-                                className="
+                                {/* VIEW */}
+                                <button
+                                    onClick={() => onView(item)}
+                                    className="
                                     w-9 h-9 rounded-lg
                                     flex items-center justify-center
                                     text-gray-500
@@ -164,37 +164,38 @@ export default function OvertimeTable({
                                     hover:bg-indigo-50
                                     transition
                                 "
-                            >
-                                <Eye className="w-4 h-4" />
-                            </button>
+                                >
+                                    <Eye className="w-4 h-4" />
+                                </button>
 
-                            {/* EDIT */}
-                            {onEditAccomplishment &&
-                                item.Status === "Pre-Approved" && (
+                                {/* EDIT */}
+                                {onEditAccomplishment &&
+                                    item.Status === "Pre-Approved" && (
 
-                                    <button
-                                        onClick={() =>
-                                            onEditAccomplishment(item)
-                                        }
-                                        className="
+                                        <button
+                                            onClick={() =>
+                                                onEditAccomplishment(item)
+                                            }
+                                            className="
                                             w-9 h-9 rounded-lg
                                             flex items-center justify-center
                                             text-amber-600
                                             hover:bg-amber-50
                                             transition
                                         "
-                                    >
-                                        <Pencil className="w-4 h-4" />
-                                    </button>
+                                        >
+                                            <Pencil className="w-4 h-4" />
+                                        </button>
 
-                                )}
+                                    )}
 
-                        </div>
+                            </div>
 
-                    </td>
+                        </td>
 
-                </tr>
-            )}
+                    </tr>
+                );
+            }}
         />
     );
 }

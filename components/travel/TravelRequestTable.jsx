@@ -1,22 +1,35 @@
 "use client";
 
 import DataTable from "@/components/table/DataTable";
+import { useState } from "react";
 
-import { Eye } from "lucide-react";
+import StatusBadge from "@/components/ui/StatusBadge";
+
+import {
+    Eye,
+    CheckCircle2,
+    XCircle,
+    EllipsisVertical,
+} from "lucide-react";
 
 import {
     formatDate,
 } from "@/lib/format";
 
-import StatusBadge from "@/components/ui/StatusBadge";
-
 import { getInitials } from "@/lib/utils";
+import { getStorageUrl } from "@/lib/storage";
 
 export default function TravelRequestTable({
     data = [],
     onView,
+    onComplete,
+    onCancel,
     loading = false,
+    employeeView = false,
 }) {
+
+    const [openMenu, setOpenMenu] =
+        useState(null);
 
     const columns = [
         "Travel No",
@@ -65,38 +78,41 @@ export default function TravelRequestTable({
             loading={loading}
             emptyTitle="No travel requests found"
             emptyDescription="There are currently no travel request records available."
-            renderRow={(item) => (
-                <tr
-                    key={item.id}
-                    className="
+            renderRow={(item) => {
+                const profileImage = getStorageUrl(item.employee?.ProfileImage);
+
+                return (
+                    <tr
+                        key={item.id}
+                        className="
                         hover:bg-gray-50
                         transition-colors
                     "
-                >
+                    >
 
-                    {/* TRAVEL NO */}
-                    <td className="px-4 py-3">
+                        {/* TRAVEL NO */}
+                        <td className="px-4 py-3">
 
-                        <div
-                            className="
+                            <div
+                                className="
                                 font-medium
                                 text-gray-900
                             "
-                        >
-                            {item.travel_no}
-                        </div>
+                            >
+                                {item.travel_no}
+                            </div>
 
-                    </td>
+                        </td>
 
-                    {/* EMPLOYEE */}
-                    {/* EMPLOYEE */}
-                    <td className="px-4 py-3">
+                        {/* EMPLOYEE */}
+                        {/* EMPLOYEE */}
+                        <td className="px-4 py-3">
 
-                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3">
 
-                            {/* AVATAR */}
-                            <div
-                                className="
+                                {/* AVATAR */}
+                                <div
+                                    className="
                                     w-10
                                     h-10
                                     rounded-full
@@ -113,92 +129,82 @@ export default function TravelRequestTable({
                                     shadow-sm
                                     shrink-0
                                 "
-                            >
-                            
-                                {item.employee?.ProfileImage ? (
-                                
-                                    <img
-                                        src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/storage/${item.employee.ProfileImage}`}
-                                        alt={item.employee ? [item.employee.FirstName, item.employee.LastName] .filter(Boolean) .join(" ") : "Employee"}
-                                        className=" w-full h-full object-cover
-                                        "
-                                    />
-                                
-                                ) : (
-                                
-                                    getInitials(
-                                        item.employee
-                                            ? [
-                                                item.employee.FirstName,
-                                                item.employee.LastName
-                                            ]
-                                            .filter(Boolean)
-                                            .join(" ")
-                                            : "Unknown Employee"
-                                    )
-                                
-                                )}
+                                >
 
-                            </div>
-                            
-                            {/* INFO */}
-                            <div className="min-w-0">
-                            
-                                <div
-                                    className="
+                                    {profileImage ? (
+
+                                        <img
+                                            src={profileImage}
+                                            alt={item.EmployeeName}
+                                            className="w-full h-full object-cover"
+                                        />
+
+                                    ) : (
+
+                                        getInitials(item.EmployeeName, "")
+
+                                    )}
+
+                                </div>
+
+                                {/* INFO */}
+                                <div className="min-w-0">
+
+                                    <div
+                                        className="
                                         font-medium
                                         text-gray-900
                                         truncate
                                     "
-                                >
-                                    {
-                                        item.employee
-                                            ? [
-                                                item.employee.FirstName,
-                                                item.employee.MiddleInitial,
-                                                item.employee.LastName
-                                            ]
-                                            .filter(Boolean)
-                                            .join(" ")
-                                            : "Unknown Employee"
-                                    }
-                                </div>
-                            
-                                <div
-                                    className="
+                                    >
+                                        {
+                                            item.employee
+                                                ? [
+                                                    item.employee.FirstName,
+                                                    item.employee.MiddleInitial,
+                                                    item.employee.LastName
+                                                ]
+                                                    .filter(Boolean)
+                                                    .join(" ")
+                                                : "Unknown Employee"
+                                        }
+                                    </div>
+
+                                    <div
+                                        className="
                                         text-xs
                                         text-gray-500
                                         truncate
                                     "
-                                >
-                                    {item.employee?.Position || "—"}
+                                    >
+                                        {item.employee?.Position || "—"}
+                                    </div>
+
                                 </div>
-                            
+
                             </div>
-                            
-                        </div>
-                            
-                    </td>
 
-                    {/* DESTINATION */}
-                    <td className="px-4 py-3">
+                        </td>
 
-                        <div
-                            className="
+                        {/* DESTINATION */}
+                        <td className="px-4 py-3">
+
+                            <div
+                                className="
                                 max-w-[220px]
                                 truncate
                             "
-                        >
-                            {item.destination}
-                        </div>
+                            >
+                                {item.destination}
+                            </div>
 
-                    </td>
+                        </td>
 
-                    {/* TRANSPORTATION */}
-                    <td className="px-4 py-3">
+                        {/* TRANSPORTATION */}
+                        <td className="px-4 py-3">
 
-                        <span
-                            className="
+                            <span
+                                className="
                                 inline-flex
                                 items-center
                                 px-2.5
@@ -209,87 +215,213 @@ export default function TravelRequestTable({
                                 bg-slate-100
                                 text-slate-700
                             "
-                        >
-                            {formatTransportationType(
-                                item.transportation_type
-                            )}
-                        </span>
+                            >
+                                {formatTransportationType(
+                                    item.transportation_type
+                                )}
+                            </span>
 
-                    </td>
+                        </td>
 
-                    {/* DEPARTURE */}
-                    <td className="px-4 py-3">
+                        {/* DEPARTURE */}
+                        <td className="px-4 py-3">
 
-                        <div
-                            className="
+                            <div
+                                className="
                                 text-sm
                                 text-gray-700
                             "
-                        >
-                            {formatDate(
-                                item.departure_datetime
-                            )}
-                        </div>
+                            >
+                                {formatDate(
+                                    item.departure_datetime
+                                )}
+                            </div>
 
-                    </td>
+                        </td>
 
-                    {/* RETURN */}
-                    <td className="px-4 py-3">
+                        {/* RETURN */}
+                        <td className="px-4 py-3">
 
-                        <div
-                            className="
+                            <div
+                                className="
                                 text-sm
                                 text-gray-700
                             "
-                        >
-                            {formatDate(
-                                item.return_datetime
-                            )}
-                        </div>
+                            >
+                                {formatDate(
+                                    item.return_datetime
+                                )}
+                            </div>
 
-                    </td>
+                        </td>
 
-                    {/* TOTAL DAYS */}
-                    <td className="px-4 py-3">
+                        {/* TOTAL DAYS */}
+                        <td className="px-4 py-3">
 
-                        <div
-                            className="
+                            <div
+                                className="
                                 font-medium
                                 text-gray-900
                             "
-                        >
-                            {item.total_days}
-                        </div>
+                            >
+                                {item.total_days}
+                            </div>
 
-                    </td>
+                        </td>
 
-                    {/* STATUS */}
-                    <td className="px-4 py-3">
+                        {/* STATUS */}
+                        <td className="px-4 py-3">
 
-                        <StatusBadge
-                            status={item.status}
-                        />
+                            <StatusBadge
+                                status={item.status}
+                            />
 
-                    </td>
+                        </td>
 
-                    {/* ACTIONS */}
-                    <td className="px-4 py-3">
+                        {/* ACTIONS */}
+                        <td className="px-4 py-3">
 
-                        <button
-                            onClick={() => onView(item)}
-                            className="
-                                text-gray-500
-                                hover:text-indigo-600
-                                transition-colors
-                            "
-                        >
-                            <Eye className="w-4 h-4" />
-                        </button>
+                            <div className="relative">
 
-                    </td>
+                                <button
+                                    onClick={() =>
+                                        setOpenMenu(
+                                            openMenu === item.id
+                                                ? null
+                                                : item.id
+                                        )
+                                    }
+                                    className="
+                                    w-9
+                                    h-9
+                                    rounded-lg
+                                    flex
+                                    items-center
+                                    justify-center
+                                    text-gray-500
+                                    hover:bg-gray-100
+                                    transition
+                                "
+                                >
+                                    <EllipsisVertical
+                                        className="
+                                        w-4
+                                        h-4
+                                    "
+                                    />
+                                </button>
 
-                </tr>
-            )}
+                                {/* DROPDOWN */}
+                                {openMenu === item.id && (
+
+                                    <div
+                                        className="
+                                        absolute
+                                        right-0
+                                        mt-2
+                                        w-52
+                                        bg-white
+                                        border
+                                        rounded-xl
+                                        shadow-xl
+                                        z-50
+                                        overflow-hidden
+                                    "
+                                    >
+
+                                        {/* VIEW */}
+                                        <button
+                                            onClick={() => {
+
+                                                onView(item);
+
+                                                setOpenMenu(null);
+                                            }}
+                                            className="
+                                            w-full
+                                            px-4
+                                            py-3
+                                            text-left
+                                            text-sm
+                                            hover:bg-gray-50
+                                        "
+                                        >
+                                            View Details
+                                        </button>
+
+                                        {/* COMPLETE */}
+                                        {employeeView &&
+                                            item.status ===
+                                            "Approved" && (
+
+                                                <button
+                                                    onClick={() => {
+
+                                                        onComplete?.(
+                                                            item.id
+                                                        );
+
+                                                        setOpenMenu(null);
+                                                    }}
+                                                    className="
+                                                w-full
+                                                px-4
+                                                py-3
+                                                text-left
+                                                text-sm
+                                                hover:bg-gray-50
+                                                text-green-600
+                                            "
+                                                >
+                                                    Mark as Completed
+                                                </button>
+
+                                            )}
+
+                                        {/* CANCEL */}
+                                        {employeeView &&
+                                            [
+                                                "Pending",
+                                                "Approved",
+                                            ].includes(
+                                                item.status
+                                            ) && (
+
+                                                <button
+                                                    onClick={() => {
+
+                                                        onCancel?.(
+                                                            item
+                                                        );
+
+                                                        setOpenMenu(null);
+                                                    }}
+                                                    className="
+                                                w-full
+                                                px-4
+                                                py-3
+                                                text-left
+                                                text-sm
+                                                hover:bg-red-50
+                                                text-red-600
+                                            "
+                                                >
+                                                    Cancel Request
+                                                </button>
+
+                                            )}
+
+                                    </div>
+
+                                )}
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+                );
+            }}
         />
     );
 }

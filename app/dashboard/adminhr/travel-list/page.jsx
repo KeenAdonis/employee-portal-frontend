@@ -96,7 +96,7 @@ export default function Page() {
                 await api.post(
                     `/travel/requests/approve`,
                     {
-                        id,
+                        travel_request_id: id,
                     }
                 );
 
@@ -105,8 +105,8 @@ export default function Page() {
                 await api.post(
                     `/travel/requests/reject`,
                     {
-                        id,
-                        reason: rejectReason,
+                        travel_request_id: id,
+                        rejection_reason: rejectReason,
                     }
                 );
             }

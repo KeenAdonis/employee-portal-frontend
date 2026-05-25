@@ -6,8 +6,10 @@ import OvertimeTable from "@/components/overtime/OvertimeTable";
 import Drawer from "@/components/ui/Drawer";
 import Pagination from "@/components/table/Pagination";
 import StatusBadge from "@/components/ui/StatusBadge";
-import Tabs from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/button";
+
+import Input from "@/components/ui/Input";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 import { formatDate, formatHours, formatTime } from "@/lib/format";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -18,6 +20,7 @@ import CreateAccomplishmentModal from "@/components/employee/CreateAccomplishmen
 import api from "@/services/api";
 
 import { Plus } from "lucide-react";
+import { overtimeStatusOptions } from "@/config/options";
 
 export default function Page() {
 
@@ -27,18 +30,15 @@ export default function Page() {
     const [meta, setMeta] = useState(null);
 
     const [selected, setSelected] = useState(null);
-
     const [openDrawer, setOpenDrawer] = useState(false);
-
     const [page, setPage] = useState(1);
-
     const [createOpen, setCreateOpen] = useState(false);
-
     const [accomplishmentOpen, setAccomplishmentOpen] = useState(false);
-
     const [selectedOvertime, setSelectedOvertime] = useState(null);
-
-    const [tab, setTab] = useState("pending");
+    const [search, setSearch] = useState("");
+    const [selectedStatus, setSelectedStatus] = useState("all");
+    const [debouncedSearch, setDebouncedSearch] =
+        useState(search);
 
     /* =========================
        FETCH OVERTIME
@@ -49,22 +49,21 @@ export default function Page() {
 
             setLoading(true);
 
-            let status = "";
+            const params = {
+                page: pageNumber,
+            };
 
-            if (tab === "pending") {
-                status = "Pending,Pre-Approved";
+            if (debouncedSearch.trim()) {
+                params.search = debouncedSearch;
             }
 
-            if (tab === "approved") {
-                status = "Approved";
-            }
-
-            if (tab === "rejected") {
-                status = "Rejected";
+            if (selectedStatus !== "all") {
+                params.status = selectedStatus;
             }
 
             const res = await api.get(
-                `/overtime?page=${pageNumber}&status=${status}`
+                "/overtime",
+                { params }
             );
 
             setData(
@@ -129,15 +128,27 @@ export default function Page() {
     ========================= */
     useEffect(() => {
 
-        fetchOvertime(page);
+        const timer = setTimeout(() => {
 
-    }, [page, tab]);
+            setDebouncedSearch(search);
+
+        }, 400);
+
+        return () => clearTimeout(timer);
+
+    }, [search]);
 
     useEffect(() => {
 
         setPage(1);
 
-    }, [tab]);
+    }, [debouncedSearch, selectedStatus]);
+
+    useEffect(() => {
+
+        fetchOvertime(page);
+
+    }, [page, debouncedSearch, selectedStatus]);
 
     return (
 
@@ -146,27 +157,45 @@ export default function Page() {
             {/* =========================
                 HEADER
             ========================= */}
-            <div className="flex items-center justify-between">
+            <div className="mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
-                <Tabs
-                    value={tab}
-                    onChange={setTab}
-                    items={[
-                        {
-                            value: "pending",
-                            label: "Pending",
-                        },
-                        {
-                            value: "approved",
-                            label: "Approved",
-                        },
-                        {
-                            value: "rejected",
-                            label: "Rejected",
-                        },
-                    ]}
-                />
+                {/* LEFT */}
+                <div className="flex flex-col sm:flex-row gap-3">
 
+                    {/* SEARCH */}
+                    <div className="w-[280px]">
+
+                        <Input
+                            value={search}
+                            onChange={(e) => {
+
+                                setSearch(e.target.value);
+                            }}
+                            placeholder="Search overtime..."
+                        />
+
+                    </div>
+
+                    {/* STATUS */}
+                    <div className="w-[220px]">
+
+                        <CustomSelect
+                            value={selectedStatus}
+                            onChange={(value) => {
+
+                                setSelectedStatus(value);
+
+                                setPage(1);
+                            }}
+                            options={overtimeStatusOptions}
+                            placeholder="Filter Status"
+                        />
+
+                    </div>
+
+                </div>
+
+                {/* RIGHT */}
                 <Button
                     onClick={() => setCreateOpen(true)}
                     className="

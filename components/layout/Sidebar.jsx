@@ -61,15 +61,15 @@ export default function Sidebar({
             {/* HEADER */}
             <div
                 className={`
-    h-16 flex items-center border-b border-white/10 mb-2
-    ${collapsed ? "justify-center px-0" : "px-4"}
-  `}
+                  h-20 flex items-center border-b border-white/10 mb-2
+                  ${collapsed ? "justify-center px-0" : "px-4"}
+                `}
             >
                 <div
                     className={`
-      flex items-center
-      ${collapsed ? "flex-col gap-1" : "gap-3"}
-    `}
+                      flex items-center
+                      ${collapsed ? "flex-col gap-1" : "gap-3"}
+                    `}
                 >
 
                     {/* LOGO */}

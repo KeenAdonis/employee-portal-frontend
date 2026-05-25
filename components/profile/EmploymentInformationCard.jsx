@@ -1,11 +1,14 @@
 "use client";
 
+import { formatDate } from "@/lib/format";
+
 import {
     Building2,
     Briefcase,
     CalendarClock,
     BadgeCheck,
     Wallet,
+    Building,
 } from "lucide-react";
 
 export default function EmploymentInformationCard({ profile }) {
@@ -23,7 +26,7 @@ export default function EmploymentInformationCard({ profile }) {
         },
         {
             label: "Date Hired",
-            value: profile?.DateHired,
+            value: formatDate(profile?.DateHired),
             icon: CalendarClock,
         },
         {
@@ -34,7 +37,7 @@ export default function EmploymentInformationCard({ profile }) {
         {
             label: "Company Name",
             value: profile?.Company,
-            icon: BadgeCheck,
+            icon: Building,
         },
         {
             label: "Monthly Salary",
@@ -48,11 +51,11 @@ export default function EmploymentInformationCard({ profile }) {
     return (
         <div
             className="
-                rounded-3xl
+                overflow-hidden
+                rounded-[30px]
                 border
-                border-gray-200
+                border-slate-200
                 bg-white
-                p-6
                 shadow-sm
                 transition-all
                 duration-300
@@ -61,88 +64,164 @@ export default function EmploymentInformationCard({ profile }) {
         >
 
             {/* HEADER */}
-            <div className="mb-6">
+            <div className="border-b border-slate-100 px-6 py-5">
 
-                <h2 className="text-xl font-semibold text-gray-900">
-                    Employment Information
-                </h2>
+                <div className="flex items-center gap-3">
 
-                <p className="mt-1 text-sm text-gray-500">
-                    Employment and organizational information.
-                </p>
+                    <div
+                        className="
+                            flex
+                            h-11
+                            w-11
+                            items-center
+                            justify-center
+                            rounded-2xl
+                            bg-violet-100
+                            text-violet-700
+                        "
+                    >
 
-            </div>
+                        <Briefcase size={20} />
 
-            {/* DIVIDER */}
-            <div className="mb-6 border-t border-gray-100" />
+                    </div>
 
-            {/* CONTENT */}
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div>
 
-                {fields.map((field, index) => {
-
-                    const Icon = field.icon;
-
-                    return (
-                        <div
-                            key={index}
+                        <h2
                             className="
-                                rounded-2xl
-                                border
-                                border-gray-100
-                                bg-gray-50
-                                p-4
+                                text-lg
+                                font-semibold
+                                tracking-tight
+                                text-slate-900
                             "
                         >
 
-                            <div className="flex items-center gap-2">
+                            Employment Information
 
-                                <div
-                                    className="
-                                        flex
-                                        h-9
-                                        w-9
-                                        items-center
-                                        justify-center
-                                        rounded-xl
-                                        bg-violet-100
-                                        text-violet-600
-                                    "
-                                >
-                                    <Icon size={16} />
-                                </div>
+                        </h2>
 
-                                <div>
+                        <p
+                            className="
+                                mt-0.5
+                                text-sm
+                                text-slate-500
+                            "
+                        >
 
-                                    <p
-                                        className="
-                                            text-xs
-                                            font-medium
-                                            uppercase
-                                            tracking-wide
-                                            text-gray-400
-                                        "
-                                    >
-                                        {field.label}
-                                    </p>
+                            Employment and organizational details.
 
-                                    <p
-                                        className="
-                                            mt-1
-                                            text-sm
-                                            font-semibold
-                                            text-gray-900
-                                        "
-                                    >
-                                        {field.value || "—"}
-                                    </p>
+                        </p>
 
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
+                    </div>
+
+                </div>
+
             </div>
+
+            {/* CONTENT */}
+            <div className="p-6">
+
+                <div
+                    className="
+                        grid
+                        grid-cols-1
+                        gap-4
+                        sm:grid-cols-2
+                    "
+                >
+
+                    {fields.map((field, index) => {
+
+                        const Icon = field.icon;
+
+                        return (
+                            <div
+                                key={index}
+                                className="
+                                    group
+                                    rounded-2xl
+                                    border
+                                    border-slate-200
+                                    bg-slate-50/80
+                                    p-4
+                                    transition-all
+                                    duration-200
+                                    hover:border-slate-300
+                                    hover:bg-white
+                                "
+                            >
+
+                                <div className="flex items-start gap-4">
+
+                                    {/* ICON */}
+                                    <div
+                                        className="
+                                            flex
+                                            h-11
+                                            w-11
+                                            shrink-0
+                                            items-center
+                                            justify-center
+                                            rounded-xl
+                                            border
+                                            border-slate-200
+                                            bg-white
+                                            text-slate-700
+                                            transition-all
+                                            duration-200
+                                            group-hover:border-violet-200
+                                            group-hover:text-violet-700
+                                        "
+                                    >
+
+                                        <Icon size={18} />
+
+                                    </div>
+
+                                    {/* CONTENT */}
+                                    <div className="min-w-0 flex-1">
+
+                                        <p
+                                            className="
+                                                text-xs
+                                                font-medium
+                                                uppercase
+                                                tracking-wide
+                                                text-slate-400
+                                            "
+                                        >
+
+                                            {field.label}
+
+                                        </p>
+
+                                        <p
+                                            className="
+                                                mt-1.5
+                                                break-words
+                                                text-sm
+                                                font-semibold
+                                                text-slate-900
+                                            "
+                                        >
+
+                                            {field.value || "—"}
+
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        );
+
+                    })}
+
+                </div>
+
+            </div>
+
         </div>
     );
 }

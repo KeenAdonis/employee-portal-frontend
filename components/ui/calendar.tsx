@@ -1,177 +1,544 @@
 "use client"
 
 import * as React from "react"
+
 import {
-  DayPicker,
-  getDefaultClassNames,
-  type DayButton,
-  type Locale,
+    DayPicker,
+    useDayPicker,
+    type DayPickerProps,
 } from "react-day-picker"
 
+import {
+    ChevronLeftIcon,
+    ChevronRightIcon,
+    ChevronDownIcon,
+} from "lucide-react"
+
 import { cn } from "@/lib/utils"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react"
+import { Button } from "@/components/ui/button"
+
+const MONTHS = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+]
+
+function CustomCaption({
+    displayMonth,
+}: {
+    displayMonth: Date
+}) {
+
+    const {
+        goToMonth,
+        nextMonth,
+        previousMonth,
+    } = useDayPicker()
+
+    const [showMonths, setShowMonths] =
+        React.useState(false)
+
+    const [showYears, setShowYears] =
+        React.useState(false)
+
+    const currentMonth =
+        displayMonth.getMonth()
+
+    const currentYear =
+        displayMonth.getFullYear()
+
+    const years = Array.from(
+        { length: 120 },
+        (_, i) => currentYear - 80 + i
+    )
+
+    return (
+
+        <div
+            className="
+                relative
+                flex items-center justify-center
+                pb-4
+            "
+        >
+
+            {/* LEFT */}
+            <button
+                type="button"
+
+                disabled={!previousMonth}
+
+                onClick={() => {
+                    if (previousMonth) {
+                        goToMonth(previousMonth)
+                    }
+                }}
+
+                className="
+                    absolute left-0
+
+                    h-9 w-9
+                    rounded-xl
+
+                    flex items-center justify-center
+
+                    hover:bg-gray-100
+                    disabled:opacity-40
+
+                    transition-all
+                "
+            >
+                <ChevronLeftIcon
+                    className="h-4 w-4"
+                />
+            </button>
+
+            {/* CENTER */}
+            <div
+                className="
+                    flex items-center gap-2
+                "
+            >
+
+                {/* MONTH */}
+                <div className="relative">
+
+                    <button
+                        type="button"
+
+                        onClick={() => {
+
+                            setShowMonths(
+                                !showMonths
+                            )
+
+                            setShowYears(false)
+                        }}
+
+                        className="
+                            h-10
+                            px-3
+
+                            rounded-xl
+
+                            flex items-center gap-1
+
+                            text-[20px]
+                            font-semibold
+
+                            hover:bg-gray-100
+
+                            transition-all
+                        "
+                    >
+
+                        {MONTHS[currentMonth]}
+
+                        <ChevronDownIcon
+                            className="
+                                h-4 w-4
+                                text-gray-500
+                            "
+                        />
+
+                    </button>
+
+                    {/* MONTH PANEL */}
+                    {showMonths && (
+
+                        <div
+                            className="
+                                absolute
+                                top-12
+                                left-1/2
+                                -translate-x-1/2
+                                z-50
+
+                                w-44
+                                max-h-72
+                                overflow-y-auto
+
+                                rounded-2xl
+                                border
+                                border-gray-100
+
+                                bg-white
+                                shadow-xl
+
+                                p-2
+                            "
+                        >
+
+                            {MONTHS.map(
+                                (month, index) => (
+
+                                    <button
+                                        key={month}
+
+                                        type="button"
+
+                                        onClick={() => {
+
+                                            goToMonth(
+                                                new Date(
+                                                    currentYear,
+                                                    index
+                                                )
+                                            )
+
+                                            setShowMonths(false)
+                                        }}
+
+                                        className={cn(
+                                            `
+                                                w-full
+                                                rounded-xl
+
+                                                px-3 py-2
+
+                                                text-left
+                                                text-sm
+
+                                                hover:bg-gray-100
+
+                                                transition-all
+                                            `,
+                                            index === currentMonth &&
+                                            "bg-indigo-50 text-indigo-600 font-medium"
+                                        )}
+                                    >
+
+                                        {month}
+
+                                    </button>
+                                )
+                            )}
+
+                        </div>
+                    )}
+
+                </div>
+
+                {/* YEAR */}
+                <div className="relative">
+
+                    <button
+                        type="button"
+
+                        onClick={() => {
+
+                            setShowYears(
+                                !showYears
+                            )
+
+                            setShowMonths(false)
+                        }}
+
+                        className="
+                            h-10
+                            px-3
+
+                            rounded-xl
+
+                            flex items-center gap-1
+
+                            text-[20px]
+                            font-semibold
+
+                            hover:bg-gray-100
+
+                            transition-all
+                        "
+                    >
+
+                        {currentYear}
+
+                        <ChevronDownIcon
+                            className="
+                                h-4 w-4
+                                text-gray-500
+                            "
+                        />
+
+                    </button>
+
+                    {/* YEAR PANEL */}
+                    {showYears && (
+
+                        <div
+                            className="
+                                absolute
+                                top-12
+                                left-0
+                                z-50
+
+                                w-32
+                                max-h-72
+                                overflow-y-auto
+
+                                rounded-2xl
+                                border
+                                border-gray-100
+
+                                bg-white
+                                shadow-xl
+
+                                p-2
+                            "
+                        >
+
+                            {years.map((year) => (
+
+                                <button
+                                    key={year}
+
+                                    type="button"
+
+                                    onClick={() => {
+
+                                        goToMonth(
+                                            new Date(
+                                                year,
+                                                currentMonth
+                                            )
+                                        )
+
+                                        setShowYears(false)
+                                    }}
+
+                                    className={cn(
+                                        `
+                                            w-full
+                                            rounded-xl
+
+                                            px-3 py-2
+
+                                            text-center
+                                            text-sm
+
+                                            hover:bg-gray-100
+
+                                            transition-all
+                                        `,
+                                        year === currentYear &&
+                                        "bg-indigo-50 text-indigo-600 font-medium"
+                                    )}
+                                >
+
+                                    {year}
+
+                                </button>
+                            ))}
+
+                        </div>
+                    )}
+
+                </div>
+
+            </div>
+
+            {/* RIGHT */}
+            <button
+                type="button"
+
+                disabled={!nextMonth}
+
+                onClick={() => {
+                    if (nextMonth) {
+                        goToMonth(nextMonth)
+                    }
+                }}
+
+                className="
+                    absolute right-0
+
+                    h-9 w-9
+                    rounded-xl
+
+                    flex items-center justify-center
+
+                    hover:bg-gray-100
+                    disabled:opacity-40
+
+                    transition-all
+                "
+            >
+                <ChevronRightIcon
+                    className="h-4 w-4"
+                />
+            </button>
+
+        </div>
+    )
+}
 
 function Calendar({
-  className,
-  classNames,
-  showOutsideDays = true,
-  captionLayout = "label",
-  buttonVariant = "ghost",
-  locale,
-  formatters,
-  components,
-  ...props
-}: React.ComponentProps<typeof DayPicker> & {
-  buttonVariant?: React.ComponentProps<typeof Button>["variant"]
-}) {
-  const defaultClassNames = getDefaultClassNames()
+    className,
+    classNames,
+    showOutsideDays = true,
+    components,
+    ...props
+}: DayPickerProps) {
 
-  return (
-    <DayPicker
-      showOutsideDays={showOutsideDays}
-      className={cn(
-        "group/calendar bg-background p-2 [--cell-radius:var(--radius-md)] [--cell-size:40px] in-data-[slot=card-content]:bg-transparent in-data-[slot=popover-content]:bg-transparent",
-        String.raw`rtl:**:[.rdp-button\_next>svg]:rotate-180`,
-        String.raw`rtl:**:[.rdp-button\_previous>svg]:rotate-180`,
-        className
-      )}
-      captionLayout={captionLayout}
-      locale={locale}
-      formatters={{
-        formatMonthDropdown: (date) =>
-          date.toLocaleString(locale?.code, { month: "short" }),
-        ...formatters,
-      }}
-      classNames={{
-        root: "w-[280px]", // ✅ FIX WIDTH
+    return (
 
-        months: "flex flex-col",
-        month: "space-y-3",
+        <DayPicker
 
-        nav: "flex items-center justify-between",
-        button_previous:
-          "h-8 w-8 rounded-md hover:bg-gray-100 flex items-center justify-center",
-        button_next:
-          "h-8 w-8 rounded-md hover:bg-gray-100 flex items-center justify-center",
+            showOutsideDays={showOutsideDays}
 
-        month_caption:
-          "flex justify-center items-center font-semibold text-sm",
+            className={cn(
+                `
+                    bg-white
+                    p-4
+                    rounded-2xl
+                    select-none
+                `,
+                className
+            )}
 
-        caption_label: "text-sm font-semibold",
+            classNames={{
 
-        table: "w-full border-collapse",
+                root:
+                    `
+                        w-[360px]
+                    `,
 
-        // ✅ FIX GRID (IMPORTANT)
-        weekdays: "grid grid-cols-7 mb-2",
-        weekday:
-          "text-center text-xs text-gray-500 font-medium",
+                nav: "hidden",
 
-        week: "grid grid-cols-7",
+                months:
+                    `
+                        flex flex-col
+                    `,
 
-        // ✅ FIX DAY SIZE
-        day: `
-    h-9 w-9 flex items-center justify-center
-    rounded-md text-sm
-    hover:bg-gray-100
-    transition
-  `,
+                month:
+                    `
+                        space-y-5
+                    `,
 
-        today: "border border-gray-300",
+                weekdays:
+                    `
+                        grid grid-cols-7
+                        mb-2
+                    `,
 
-        selected:
-          "bg-purple-600 text-white hover:bg-purple-700",
+                weekday:
+                    `
+                        text-center
+                        text-[13px]
+                        font-medium
+                        text-gray-500
+                        pb-2
+                    `,
 
-        outside: "text-gray-300",
+                week:
+                    `
+                        grid grid-cols-7
+                    `,
 
-        disabled: "opacity-40",
+                day:
+                    `
+                        h-11 w-11
 
-        hidden: "invisible",
-      }}
-      components={{
-        Root: ({ className, rootRef, ...props }) => {
-          return (
-            <div
-              data-slot="calendar"
-              ref={rootRef}
-              className={cn(className)}
-              {...props}
-            />
-          )
-        },
-        Chevron: ({ className, orientation, ...props }) => {
-          if (orientation === "left") {
-            return (
-              <ChevronLeftIcon className={cn("size-4", className)} {...props} />
-            )
-          }
+                        flex items-center justify-center
 
-          if (orientation === "right") {
-            return (
-              <ChevronRightIcon className={cn("size-4", className)} {...props} />
-            )
-          }
+                        rounded-xl
 
-          return (
-            <ChevronDownIcon className={cn("size-4", className)} {...props} />
-          )
-        },
-        DayButton: ({ ...props }) => (
-          <CalendarDayButton locale={locale} {...props} />
-        ),
-        WeekNumber: ({ children, ...props }) => {
-          return (
-            <td {...props}>
-              <div className="flex size-(--cell-size) items-center justify-center text-center">
-                {children}
-              </div>
-            </td>
-          )
-        },
-        ...components,
-      }}
-      {...props}
-    />
-  )
+                        text-sm
+                        font-medium
+
+                        transition-all
+
+                        hover:bg-gray-100
+                    `,
+
+                today:
+                    `
+                        border
+                        border-gray-300
+                        font-semibold
+                    `,
+
+                selected:
+                    `
+                        bg-indigo-600
+                        text-white
+
+                        hover:bg-indigo-700
+                    `,
+
+                outside:
+                    `
+                        text-gray-300
+                    `,
+
+                disabled:
+                    `
+                        opacity-40
+                        pointer-events-none
+                    `,
+
+                hidden:
+                    `
+                        invisible
+                    `,
+
+                ...classNames,
+            }}
+
+            components={{
+
+                MonthCaption: ({
+                    calendarMonth,
+                }) => (
+                    <CustomCaption
+                        displayMonth={
+                            calendarMonth.date
+                        }
+                    />
+                ),
+
+                DayButton: ({
+                    className,
+                    ...props
+                }) => (
+
+                    <Button
+                        variant="ghost"
+                        size="icon"
+
+                        className={cn(
+                            `
+                                h-11 w-11
+                                rounded-xl
+
+                                font-medium
+
+                                transition-all
+                            `,
+                            className
+                        )}
+
+                        {...props}
+                    />
+                ),
+
+                ...components,
+            }}
+
+            {...props}
+        />
+    )
 }
 
-function CalendarDayButton({
-  className,
-  day,
-  modifiers,
-  locale,
-  ...props
-}: React.ComponentProps<typeof DayButton> & { locale?: Partial<Locale> }) {
-  const defaultClassNames = getDefaultClassNames()
-
-  const ref = React.useRef<HTMLButtonElement>(null)
-  React.useEffect(() => {
-    if (modifiers.focused) ref.current?.focus()
-  }, [modifiers.focused])
-
-  return (
-    <Button
-      ref={ref}
-      variant="ghost"
-      size="icon"
-      data-day={day.date.toLocaleDateString(locale?.code)}
-      data-selected-single={
-        modifiers.selected &&
-        !modifiers.range_start &&
-        !modifiers.range_end &&
-        !modifiers.range_middle
-      }
-      data-range-start={modifiers.range_start}
-      data-range-end={modifiers.range_end}
-      data-range-middle={modifiers.range_middle}
-      className={cn(
-        "relative isolate z-10 flex aspect-square size-auto w-full min-w-(--cell-size) flex-col gap-1 border-0 leading-none font-normal group-data-[focused=true]/day:relative group-data-[focused=true]/day:z-10 group-data-[focused=true]/day:border-ring group-data-[focused=true]/day:ring-[3px] group-data-[focused=true]/day:ring-ring/50 data-[range-end=true]:rounded-(--cell-radius) data-[range-end=true]:rounded-r-(--cell-radius) data-[range-end=true]:bg-primary data-[range-end=true]:text-primary-foreground data-[range-middle=true]:rounded-none data-[range-middle=true]:bg-muted data-[range-middle=true]:text-foreground data-[range-start=true]:rounded-(--cell-radius) data-[range-start=true]:rounded-l-(--cell-radius) data-[range-start=true]:bg-primary data-[range-start=true]:text-primary-foreground data-[selected-single=true]:bg-primary data-[selected-single=true]:text-primary-foreground dark:hover:text-foreground [&>span]:text-xs [&>span]:opacity-70",
-        defaultClassNames.day,
-        className
-      )}
-      {...props}
-    />
-  )
+export {
+    Calendar,
 }
-
-export { Calendar, CalendarDayButton }

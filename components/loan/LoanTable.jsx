@@ -1,8 +1,10 @@
 "use client";
 
 import DataTable from "@/components/table/DataTable";
-
 import StatusBadge from "@/components/ui/StatusBadge";
+
+import { getInitials } from "@/lib/utils";
+import { getStorageUrl } from "@/lib/storage";
 
 import {
     Eye,
@@ -50,24 +52,27 @@ export default function LoanTable({
             loading={loading}
             emptyTitle="No loan records found"
             emptyDescription="There are currently no employee loan records available."
-            renderRow={(loan) => (
+            renderRow={(loan) => {
+                const profileImage = getStorageUrl(loan.employee?.ProfileImage);
 
-                <tr
-                    key={loan.id}
-                    className="
+                return (
+
+                    <tr
+                        key={loan.id}
+                        className="
                         hover:bg-gray-50
                         transition-colors
                     "
-                >
+                    >
 
-                    {/* EMPLOYEE */}
-                    <td className="px-4 py-3">
+                        {/* EMPLOYEE */}
+                        <td className="px-4 py-3">
 
-                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3">
 
-                            {/* AVATAR */}
-                            <div
-                                className="
+                                {/* AVATAR */}
+                                <div
+                                    className="
                                     w-10
                                     h-10
                                     rounded-full
@@ -84,119 +89,115 @@ export default function LoanTable({
                                     shadow-sm
                                     shrink-0
                                 "
-                            >
+                                >
 
-                                {loan.employee?.ProfileImage ? (
+                                    {profileImage ? (
 
-                                    <img
-                                        src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/storage/${loan.employee.ProfileImage}`}
-                                        alt={getEmployeeName(loan)}
+                                        <img
+                                            src={profileImage}
+                                            alt={loan.EmployeeName}
+                                            className="w-full h-full object-cover"
+                                        />
+
+                                    ) : (
+
+                                        getInitials(loan.EmployeeName, "")
+
+                                    )}
+
+                                </div>
+
+                                {/* INFO */}
+                                <div className="flex flex-col min-w-0">
+
+                                    <span
                                         className="
-                                            w-full
-                                            h-full
-                                            object-cover
-                                        "
-                                    />
-
-                                ) : (
-
-                                    `${loan.employee?.FirstName?.charAt(0) || ""}${loan.employee?.LastName?.charAt(0) || ""}`
-
-                                )}
-
-                            </div>
-
-                            {/* INFO */}
-                            <div className="flex flex-col min-w-0">
-
-                                <span
-                                    className="
                                         font-medium
                                         text-gray-900
                                         truncate
                                     "
-                                >
-                                    {getEmployeeName(loan)}
-                                </span>
+                                    >
+                                        {getEmployeeName(loan)}
+                                    </span>
 
-                                <span
-                                    className="
+                                    <span
+                                        className="
                                         text-xs
                                         text-gray-500
                                         truncate
                                     "
-                                >
-                                    {getEmployeePosition(loan)}
-                                </span>
+                                    >
+                                        {getEmployeePosition(loan)}
+                                    </span>
+
+                                </div>
 
                             </div>
 
-                        </div>
+                        </td>
 
-                    </td>
+                        {/* LOAN TYPE */}
+                        <td className="px-4 py-3">
+                            {loan.loan_type}
+                        </td>
 
-                    {/* LOAN TYPE */}
-                    <td className="px-4 py-3">
-                        {loan.loan_type}
-                    </td>
+                        {/* TOTAL */}
+                        <td className="px-4 py-3">
 
-                    {/* TOTAL */}
-                    <td className="px-4 py-3">
+                            ₱{" "}
 
-                        ₱{" "}
+                            {Number(
+                                loan.total_amount
+                            ).toFixed(2)}
 
-                        {Number(
-                            loan.total_amount
-                        ).toFixed(2)}
+                        </td>
 
-                    </td>
-
-                    {/* BALANCE */}
-                    <td
-                        className="
+                        {/* BALANCE */}
+                        <td
+                            className="
                             px-4 py-3
                             font-semibold
                             text-red-600
                         "
-                    >
+                        >
 
-                        ₱{" "}
+                            ₱{" "}
 
-                        {Number(
-                            loan.balance
-                        ).toFixed(2)}
+                            {Number(
+                                loan.balance
+                            ).toFixed(2)}
 
-                    </td>
+                        </td>
 
-                    {/* MONTHLY */}
-                    <td className="px-4 py-3">
+                        {/* MONTHLY */}
+                        <td className="px-4 py-3">
 
-                        ₱{" "}
+                            ₱{" "}
 
-                        {Number(
-                            loan.monthly_amortization
-                        ).toFixed(2)}
+                            {Number(
+                                loan.monthly_amortization
+                            ).toFixed(2)}
 
-                    </td>
+                        </td>
 
-                    {/* STATUS */}
-                    <td className="px-4 py-3">
+                        {/* STATUS */}
+                        <td className="px-4 py-3">
 
-                        <StatusBadge
-                            status={loan.status}
-                        />
+                            <StatusBadge
+                                status={loan.status}
+                            />
 
-                    </td>
+                        </td>
 
-                    {/* ACTIONS */}
-                    <td className="px-4 py-3">
+                        {/* ACTIONS */}
+                        <td className="px-4 py-3">
 
-                        <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
 
-                            {/* VIEW */}
-                            <button
-                                onClick={() => onView(loan)}
-                                className="
+                                {/* VIEW */}
+                                <button
+                                    onClick={() => onView(loan)}
+                                    className="
                                     w-9 h-9 rounded-lg
                                     flex items-center justify-center
                                     text-gray-500
@@ -204,14 +205,14 @@ export default function LoanTable({
                                     hover:bg-indigo-50
                                     transition
                                 "
-                            >
-                                <Eye size={16} />
-                            </button>
+                                >
+                                    <Eye size={16} />
+                                </button>
 
-                            {/* DELETE */}
-                            <button
-                                onClick={() => onDelete(loan)}
-                                className="
+                                {/* DELETE */}
+                                <button
+                                    onClick={() => onDelete(loan)}
+                                    className="
                                     w-9 h-9 rounded-lg
                                     flex items-center justify-center
                                     text-gray-500
@@ -219,16 +220,17 @@ export default function LoanTable({
                                     hover:bg-red-50
                                     transition
                                 "
-                            >
-                                <Trash2 size={16} />
-                            </button>
+                                >
+                                    <Trash2 size={16} />
+                                </button>
 
-                        </div>
+                            </div>
 
-                    </td>
+                        </td>
 
-                </tr>
-            )}
+                    </tr>
+                );
+            }}
         />
     );
 }

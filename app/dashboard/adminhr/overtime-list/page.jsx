@@ -10,10 +10,14 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import { Button } from "@/components/ui/button";
 import Tabs from "@/components/ui/Tabs";
 import CustomDatePicker from "@/components/ui/CustomDatePicker";
+import Input from "@/components/ui/Input";
+import CustomSelect from "@/components/ui/CustomSelect";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useActionState } from "@/lib/useActionState";
 import api from "@/services/api";
 import { DownloadCloud } from "lucide-react";
+
+import { overtimeStatusOptions } from "@/config/options";
 
 export default function Page() {
     const [loading, setLoading] = useState(true);
@@ -29,12 +33,16 @@ export default function Page() {
     const [fromDate, setFromDate] = useState("");
     const [toDate, setToDate] = useState("");
     const [exportType, setExportType] = useState("detailed");
+    const [search, setSearch] = useState("");
+    const [selectedStatus, setSelectedStatus] = useState("all");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const { showToast } = useToast();
 
     const preApproveAction = useActionState();
     const approveAction = useActionState();
     const rejectAction = useActionState();
     const downloadAction = useActionState();
+
 
 
     const fetchOvertime = async (pageNumber = 1) => {
@@ -46,8 +54,35 @@ export default function Page() {
                 ? "Pending,Pre-Approved"
                 : "Approved,Rejected";
 
+            const params = {
+                page: pageNumber,
+            };
+
+            if (statusFilter) {
+                params.status = statusFilter;
+            }
+
+            if (debouncedSearch.trim()) {
+                params.search = debouncedSearch;
+            }
+
+            if (selectedStatus !== "all") {
+
+                if (tab === "requests") {
+
+                    // requests tab only allows pending/pre-approved
+                    params.status = selectedStatus;
+
+                } else {
+
+                    // history tab only allows approved/rejected
+                    params.status = selectedStatus;
+                }
+            }
+
             const res = await api.get(
-                `/overtime?page=${pageNumber}&status=${statusFilter}`
+                "/overtime",
+                { params }
             );
 
             setData(res.data.data.data || []);
@@ -164,7 +199,8 @@ export default function Page() {
             status: statusFilter,
         });
 
-        const url = `http://127.0.0.1:8000/api/overtime/export?${params.toString()}`;
+        const url =
+            `${process.env.NEXT_PUBLIC_API_URL}/overtime/export?${params.toString()}`;
 
         window.open(url, "_blank");
 
@@ -179,6 +215,18 @@ export default function Page() {
     };
 
     useEffect(() => {
+
+        const timer = setTimeout(() => {
+
+            setDebouncedSearch(search);
+
+        }, 400);
+
+        return () => clearTimeout(timer);
+
+    }, [search]);
+
+    useEffect(() => {
         if (!downloadOpen) {
             resetDownloadState();
         }
@@ -186,35 +234,105 @@ export default function Page() {
 
     useEffect(() => {
         fetchOvertime(page);
-    }, [page, tab]);
+    }, [
+        page,
+        tab,
+        debouncedSearch,
+        selectedStatus,
+    ]);
 
     useEffect(() => {
+
         setPage(1);
-    }, [tab]);
+
+    }, [debouncedSearch, selectedStatus, tab]);
 
     return (
         <div className="p-6">
 
-            <div className="flex justify-between items-center mb-4">
+            <div
+                className="
+                    flex
+                    flex-col
+                    xl:flex-row
+                    xl:items-center
+                    xl:justify-between
+                    gap-4
+                    mb-4
+                "
+            >
 
-                <Tabs value={tab} onChange={setTab} />
+                {/* LEFT */}
+                <Tabs
+                    value={tab}
+                    onChange={setTab}
+                />
 
-                <Button
-                    onClick={() => setDownloadOpen(true)}
+                {/* RIGHT */}
+                <div
                     className="
-                            bg-gradient-to-r from-amber-400 to-amber-500
+                        flex
+                        flex-col
+                        lg:flex-row
+                        lg:items-center
+                        gap-3
+                    "
+                >
+
+                    {/* SEARCH */}
+                    <div className="w-[280px]">
+
+                        <Input
+                            value={search}
+                            onChange={(e) =>
+                                setSearch(e.target.value)
+                            }
+                            placeholder="Search overtime..."
+                        />
+
+                    </div>
+
+                    {/* STATUS FILTER */}
+                    <div className="w-[220px]">
+
+                        <CustomSelect
+                            value={selectedStatus}
+                            onChange={setSelectedStatus}
+                            options={overtimeStatusOptions}
+                            placeholder="Filter Status"
+                        />
+
+                    </div>
+
+                    {/* DOWNLOAD */}
+                    <Button
+                        onClick={() => setDownloadOpen(true)}
+                        className="
+                            bg-gradient-to-r
+                            from-amber-400
+                            to-amber-500
                             text-white
                             font-medium
-                            px-4 py-2 rounded-lg
-                            shadow-md shadow-amber-500/30
-                            hover:from-amber-300 hover:to-amber-400
-                            hover:shadow-lg hover:shadow-amber-500/40
+                            px-4
+                            py-2
+                            rounded-lg
+                            shadow-md
+                            shadow-amber-500/30
+                            hover:from-amber-300
+                            hover:to-amber-400
+                            hover:shadow-lg
+                            hover:shadow-amber-500/40
                             active:scale-[0.98]
-                            transition-all duration-200
-                            "
-                >
-                    <DownloadCloud size={14} /> Download
-                </Button>
+                            transition-all
+                            duration-200
+                            whitespace-nowrap
+                        "
+                    >
+                        <DownloadCloud size={14} />
+                        Download
+                    </Button>
+
+                </div>
 
             </div>
 

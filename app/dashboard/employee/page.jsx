@@ -14,6 +14,11 @@ import DashboardSkeleton from "@/components/dashboard/DashboardSkeleton";
 
 import useEmployeeDashboardData from "@/utils/useEmployeeDashboardData";
 
+/* ADD THESE */
+import RecentLeavesSection from "@/components/dashboard/adminhr/leaves/RecentLeavesSection";
+
+import RecentOvertimeSection from "@/components/dashboard/adminhr/overtime/RecentOvertimeSection";
+
 export default function EmployeeDashboardPage() {
 
     const {
@@ -21,13 +26,10 @@ export default function EmployeeDashboardPage() {
         loading,
         employee,
         leaveCredits,
+        todayLeaves,
+        todayOvertimes,
     } = useEmployeeDashboardData();
 
-    /*
-    |--------------------------------------------------------------------------
-    | LOADING STATE
-    |--------------------------------------------------------------------------
-    */
     if (loading) {
         return <DashboardSkeleton />;
     }
@@ -45,6 +47,19 @@ export default function EmployeeDashboardPage() {
 
             {/* QUICK ACTIONS */}
             <EmployeeQuickActions />
+
+            {/* NEW SECTION */}
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+
+                <RecentLeavesSection
+                    leaves={todayLeaves}
+                />
+
+                <RecentOvertimeSection
+                    overtimes={todayOvertimes}
+                />
+
+            </div>
 
             {/* LEAVE CREDITS */}
             <EmployeeLeaveCredits

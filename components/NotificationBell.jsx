@@ -97,21 +97,14 @@ export default function NotificationBell() {
 
 
         if (!user?.id) {
-            console.log("NO USER ID");
             return;
         }
-
-        console.log(
-            "SUBSCRIBING TO:",
-            `notifications.${user.id}`
-        );
 
         const channel = echo.private(
             `notifications.${user.id}`
         );
 
         channel.subscribed(() => {
-            console.log("SUBSCRIBED");
         });
 
         channel.error((error) => {
@@ -124,11 +117,6 @@ export default function NotificationBell() {
         channel.listen(
             ".notification.created",
             (event) => {
-
-                console.log(
-                    "EVENT RECEIVED",
-                    event
-                );
 
                 fetchNotifications();
             }
@@ -280,13 +268,30 @@ export default function NotificationBell() {
                 DROPDOWN
             ======================================================= */}
             {open && (
+
+                
                 <div
                     className="
-                        absolute
-                        right-0
-                        mt-3
-                        w-[400px]
-                        max-w-[95vw]
+                        fixed
+                        top-16
+                        left-1/2
+                        -translate-x-1/2
+
+                        sm:absolute
+                        sm:top-auto
+                        sm:left-auto
+                        sm:right-0
+                        sm:translate-x-0
+
+                        mt-0
+                        sm:mt-3
+
+                        w-[calc(100vw-24px)]
+                        max-w-[420px]
+
+                        sm:w-[380px]
+                        lg:w-[420px]
+
                         bg-[#081028]/95
                         backdrop-blur-xl
                         border
@@ -310,6 +315,8 @@ export default function NotificationBell() {
                             flex
                             items-center
                             justify-between
+                            flex-wrap
+                            gap-2
                             px-4
                             py-3
                             border-b
@@ -350,7 +357,10 @@ export default function NotificationBell() {
                                     flex
                                     items-center
                                     gap-1
-                                    text-xs
+                                    text-sm
+                                    px-2
+                                    py-1
+                                    rounded-lg
                                     text-blue-600
                                     hover:text-blue-700
                                     font-medium
@@ -369,7 +379,8 @@ export default function NotificationBell() {
                     ======================================================= */}
                     <div
                         className="
-                            max-h-[420px]
+                            max-h-[calc(100vh-100px)]
+                            sm:max-h-[500px]
                             overflow-y-auto
                             scrollbar-thin
                         "
@@ -464,8 +475,10 @@ export default function NotificationBell() {
                                         className={`
                                             w-full
                                             text-left
-                                            px-4
-                                            py-4
+                                            px-3
+                                            sm:px-4
+                                            py-3
+                                            sm:py-4
                                             border-b
                                             border-gray-100
                                             dark:border-slate-800
@@ -493,8 +506,10 @@ export default function NotificationBell() {
                                             <div
                                                 className={`
                                                     mt-0.5
-                                                    w-11
-                                                    h-11
+                                                    w-10
+                                                    h-10
+                                                    sm:w-11
+                                                    sm:h-11
                                                     rounded-2xl
                                                     border
                                                     border-white/5
@@ -541,6 +556,7 @@ export default function NotificationBell() {
                                                                     mt-1
                                                                     text-xs
                                                                     leading-5
+                                                                    opacity-80
                                                                     text-gray-600
                                                                     dark:text-slate-300
                                                                     line-clamp-2

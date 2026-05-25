@@ -1,57 +1,92 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import api from "@/services/api";
 import { useToast } from "@/components/ui/ToastProvider";
-import SecureDocumentTable from "@/components/admintesting/SecureDocumentTable";
-import { useEffect } from "react";
+import SecureDocumentsTable from "@/components/secure-documents/SecureDocumentsTable";
 
-export default function SecureDocumentWrapper({ data, refresh, onViewHistory }) {
-    const [selected, setSelected] = useState([]);
+export default function SecureDocumentWrapper({
+    data,
+    refresh,
+    onViewHistory,
+}) {
+
+    const [selectedRows, setSelectedRows] = useState([]);
     const [loading, setLoading] = useState(false);
+
     const { showToast } = useToast();
 
+    /* =========================
+       TOGGLE SINGLE
+    ========================= */
+    const toggle = (item) => {
 
-    const toggle = (id) => {
-        setSelected((prev) =>
-            prev.includes(id)
-                ? prev.filter((i) => i !== id)
-                : [...prev, id]
-        );
+        setSelectedRows((prev) => {
+
+            const exists = prev.some(
+                (row) => row.id === item.id
+            );
+
+            if (exists) {
+
+                return prev.filter(
+                    (row) => row.id !== item.id
+                );
+            }
+
+            return [...prev, item];
+        });
     };
 
-    const allSelected = data.length > 0 && selected.length === data.length;
+    /* =========================
+       SELECT ALL
+    ========================= */
+    const safeData = Array.isArray(data)
+        ? data
+        : [];
+
+    const selectableRows = safeData.filter(
+        (item) =>
+            item.status !== "Sent" &&
+            item.status !== "Queued" &&
+            item.status !== "Processing"
+    );
+
+    const allSelected =
+        selectableRows.length > 0 &&
+        selectableRows.every((item) =>
+            selectedRows.some(
+                (row) => row.id === item.id
+            )
+        );
 
     const toggleAll = () => {
+
         if (allSelected) {
-            setSelected([]);
+
+            setSelectedRows((prev) =>
+                prev.filter(
+                    (row) =>
+                        !selectableRows.some(
+                            (item) => item.id === row.id
+                        )
+                )
+            );
+
         } else {
-            setSelected(data.map(item => item.id));
-        }
-    };
 
-    const bulkDelete = async () => {
-        if (!confirm("Delete selected documents?")) return;
+            setSelectedRows((prev) => {
 
-        try {
-            await api.post("/secure-documents/bulk-delete", {
-                ids: selected,
-            });
+                const existingIds = prev.map(
+                    (row) => row.id
+                );
 
-            showToast({
-                title: "Deleted",
-                message: "Documents removed",
-                type: "success",
-            });
+                const newRows = selectableRows.filter(
+                    (item) =>
+                        !existingIds.includes(item.id)
+                );
 
-            setSelected([]);
-            refresh();
-
-        } catch {
-            showToast({
-                title: "Error",
-                message: "Bulk delete failed",
-                type: "error",
+                return [...prev, ...newRows];
             });
         }
     };
@@ -60,29 +95,42 @@ export default function SecureDocumentWrapper({ data, refresh, onViewHistory }) 
        BULK SEND
     ========================= */
     const bulkSend = async () => {
+
         try {
+
             setLoading(true);
 
-            await api.post("/secure-documents/bulk-send", {
-                ids: selected,
-            });
+            await api.post(
+                "/secure-documents/bulk-send",
+                {
+                    ids: selectedRows.map(
+                        (row) => row.id
+                    ),
+                }
+            );
 
             showToast({
                 title: "Success",
-                message: "Documents sent!",
+                message: "Documents queued successfully",
                 type: "success",
             });
 
-            setSelected([]);
+            setSelectedRows([]);
+
             refresh();
 
         } catch (err) {
+
             showToast({
                 title: "Error",
-                message: err?.response?.data?.message || "Bulk send failed",
+                message:
+                    err?.response?.data?.message ||
+                    "Bulk send failed",
                 type: "error",
             });
+
         } finally {
+
             setLoading(false);
         }
     };
@@ -91,91 +139,74 @@ export default function SecureDocumentWrapper({ data, refresh, onViewHistory }) 
        SEND SINGLE
     ========================= */
     const sendSingle = async (id) => {
+
         try {
-            await api.post(`/secure-documents/send/${id}`);
+
+            await api.post(
+                `/secure-documents/send/${id}`
+            );
 
             showToast({
                 title: "Success",
-                message: "Document sent!",
+                message: "Document queued successfully",
                 type: "success",
             });
 
             refresh();
+
         } catch (err) {
+
             showToast({
                 title: "Error",
-                message: err?.response?.data?.message || "Send failed",
+                message:
+                    err?.response?.data?.message ||
+                    "Send failed",
                 type: "error",
             });
         }
     };
 
     /* =========================
-       RESEND
+       SEND GROUP
     ========================= */
-    const handleResend = async (id) => {
+    const sendGrouped = async (id) => {
+
         try {
-            await api.post(`/secure-documents/${id}/resend`);
+
+            await api.post(
+                `/secure-documents/grouped-send/${id}`
+            );
 
             showToast({
                 title: "Success",
-                message: "Document resend queued",
+                message:
+                    "Grouped documents queued successfully",
                 type: "success",
             });
 
             refresh();
+
         } catch (err) {
+
             showToast({
                 title: "Error",
-                message: "Resend failed",
+                message:
+                    err?.response?.data?.message ||
+                    "Grouped send failed",
                 type: "error",
             });
         }
     };
 
     /* =========================
-       VIEW
+       AUTO REFRESH
     ========================= */
-    const handleView = (item) => {
-        console.log("VIEW:", item);
-        // next: modal PDF viewer
-    };
-
-    /* =========================
-       DOWNLOAD
-    ========================= */
-    const handleDownload = (item) => {
-        window.open(`/storage/${item.file_path}`, "_blank");
-    };
-
-    /* =========================
-       DELETE
-    ========================= */
-    const handleDelete = async (id) => {
-        if (!confirm("Delete this document?")) return;
-
-        try {
-            await api.delete(`/secure-documents/${id}`);
-
-            showToast({
-                title: "Deleted",
-                message: "Document removed",
-                type: "success",
-            });
-
-            refresh();
-        } catch (err) {
-            showToast({
-                title: "Error",
-                message: "Delete failed",
-                type: "error",
-            });
-        }
-    };
-
     useEffect(() => {
-        const hasProcessing = data.some(
-            (doc) => doc.status === "Queued" || doc.status === "Processing"
+
+        const hasProcessing = safeData.some(
+            (doc) =>
+                doc.status === "Queued" ||
+                doc.status === "Processing"
         );
 
         if (!hasProcessing) return;
@@ -185,27 +216,131 @@ export default function SecureDocumentWrapper({ data, refresh, onViewHistory }) 
         }, 3000);
 
         return () => clearInterval(interval);
-    }, [data]);
 
-
+    }, [data, refresh]);
 
     return (
+
         <div>
-            <SecureDocumentTable
-                data={data}
-                selected={selected}
+
+            {/* BULK ACTION BAR */}
+            {selectedRows.length > 0 && (
+
+                <div
+                    className="
+                        mb-4
+                        flex
+                        items-center
+                        justify-between
+                        rounded-2xl
+                        border
+                        border-indigo-100
+                        bg-indigo-50
+                        px-4
+                        py-3
+                    "
+                >
+
+                    <div className="space-y-1">
+
+                        <div
+                            className="
+                                text-sm
+                                font-medium
+                                text-indigo-700
+                            "
+                        >
+                            {
+                                new Set(
+                                    selectedRows.map((item) => {
+
+                                        const emails = item.recipients
+                                            ?.map((r) => r.email)
+                                            .sort()
+                                            .join(",");
+
+                                        return `${item.employee_name}-${emails}`;
+                                    })
+                                ).size
+                            } row(s) selected (
+                            {selectedRows.length} document(s))
+                        </div>
+
+                        <div
+                            className="
+                                text-xs
+                                text-indigo-500
+                            "
+                        >
+                            Documents for the same recipient
+                            will be grouped automatically.
+                        </div>
+
+                    </div>
+
+                    <div
+                        className="
+                            flex
+                            items-center
+                            gap-2
+                        "
+                    >
+
+                        <button
+                            onClick={bulkSend}
+                            disabled={loading}
+                            className="
+                                px-4
+                                py-2
+                                rounded-xl
+                                bg-indigo-600
+                                text-white
+                                text-sm
+                                hover:bg-indigo-700
+                                transition
+                                disabled:opacity-50
+                            "
+                        >
+                            {loading
+                                ? "Sending..."
+                                : "Send Selected"}
+                        </button>
+
+                        <button
+                            onClick={() =>
+                                setSelectedRows([])
+                            }
+                            className="
+                                px-4
+                                py-2
+                                rounded-xl
+                                border
+                                text-sm
+                                hover:bg-gray-100
+                                transition
+                            "
+                        >
+                            Clear
+                        </button>
+
+                    </div>
+
+                </div>
+            )}
+
+            <SecureDocumentsTable
+                data={safeData}
+                selected={selectedRows.map(
+                    (row) => row.id
+                )}
                 toggle={toggle}
-                onSendSingle={sendSingle}
-                onResend={handleResend}
-                onView={handleView}
-                onDownload={handleDownload}
-                onDelete={handleDelete}
                 toggleAll={toggleAll}
                 allSelected={allSelected}
-                onBulkSend={bulkSend}
-                onBulkDelete={bulkDelete}
+                onSendSingle={sendSingle}
+                onSendGrouped={sendGrouped}
                 onViewHistory={onViewHistory}
             />
+
         </div>
     );
 }

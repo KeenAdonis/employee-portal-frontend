@@ -1,19 +1,15 @@
 "use client";
 
+import CustomSelect from "@/components/ui/CustomSelect";
+
 import {
 
     ResponsiveContainer,
-
     AreaChart,
-
     Area,
-
     CartesianGrid,
-
     Tooltip,
-
     XAxis,
-
     YAxis,
 
 } from "recharts";
@@ -35,11 +31,30 @@ const formatCurrency = (value = 0) => {
     ).format(value);
 };
 
+const currentYear =
+    new Date().getFullYear();
+
+const yearOptions =
+    Array.from(
+        { length: 5 },
+        (_, index) => {
+
+            const year =
+                currentYear - index;
+
+            return {
+                value: String(year),
+                label: String(year),
+            };
+        }
+    );
+
 export default function MonthlyTrendChart({
 
     monthlyTrend = [],
-
     loading,
+    selectedYear,
+    setSelectedYear,
 
 }) {
 
@@ -56,29 +71,61 @@ export default function MonthlyTrendChart({
         >
 
             {/* HEADER */}
-            <div className="mb-6">
+            <div
+                className="
+        mb-6
+        flex
+        items-start
+        justify-between
+        gap-4
+    "
+            >
 
-                <h2
-                    className="
-                        text-2xl
-                        font-bold
-                        tracking-tight
-                        text-slate-900
-                    "
-                >
-                    Monthly Financial Trend
-                </h2>
+                <div>
 
-                <p
-                    className="
-                        mt-1
-                        text-sm
-                        text-slate-500
-                    "
-                >
-                    Monitor approved requisition totals
-                    and financial movement per month.
-                </p>
+                    <h2
+                        className="
+                text-2xl
+                font-bold
+                tracking-tight
+                text-slate-900
+            "
+                    >
+                        Monthly Financial Trend
+                    </h2>
+
+                    <p
+                        className="
+                mt-1
+                text-sm
+                text-slate-500
+            "
+                    >
+                        Monitor approved requisition totals
+                        and financial movement per month.
+                    </p>
+
+                </div>
+
+                {/* YEAR FILTER */}
+                <div className="w-[140px]">
+
+                    <CustomSelect
+
+                        value={String(selectedYear)}
+
+                        onChange={(value) =>
+                            setSelectedYear(
+                                Number(value)
+                            )
+                        }
+
+                        options={yearOptions}
+
+                        placeholder="Year"
+                    />
+
+                </div>
 
             </div>
 

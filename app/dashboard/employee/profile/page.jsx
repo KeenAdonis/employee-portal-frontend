@@ -3,9 +3,7 @@
 import { useEffect, useState } from "react";
 
 import ProfileHeader from "@/components/profile/ProfileHeader";
-import ProfileInformationCard from "@/components/profile/ProfileInformationCard";
 import EmploymentInformationCard from "@/components/profile/EmploymentInformationCard";
-import ContactInformationCard from "@/components/profile/ContactInformationCard";
 import GovernmentInformationCard from "@/components/profile/GovernmentInformationCard";
 
 import { getEmployeeProfile } from "@/services/profileService";
@@ -71,13 +69,9 @@ export default function EmployeeProfilePage() {
             {/* PROFILE CONTENT */}
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
 
-                <ProfileInformationCard profile={profile} />
-
-                <EmploymentInformationCard profile={profile} />
-
-                <ContactInformationCard profile={profile} />
-
                 <GovernmentInformationCard profile={profile} />
+
+                <EmploymentInformationCard profile={profile} />              
 
             </div>
         </div>

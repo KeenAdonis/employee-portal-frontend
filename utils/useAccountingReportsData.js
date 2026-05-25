@@ -17,7 +17,7 @@ import {
 
 } from "@/services/accountingReportsService";
 
-export default function useAccountingReportsData() {
+export default function useAccountingReportsData(selectedYear) {
 
     /*
     |--------------------------------------------------------------------------
@@ -83,7 +83,7 @@ export default function useAccountingReportsData() {
 
                     getLiquidationSummary(),
 
-                    getMonthlyFinancialTrend(),
+                    getMonthlyFinancialTrend(selectedYear),
 
                     getFinancialSummaryTable(),
 
@@ -165,7 +165,7 @@ export default function useAccountingReportsData() {
 
         fetchReportsData();
 
-    }, []);
+    }, [selectedYear]);
 
     return {
 

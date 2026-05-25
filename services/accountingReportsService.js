@@ -33,13 +33,15 @@ export const getLiquidationSummary = async () => {
 | MONTHLY FINANCIAL TREND
 |--------------------------------------------------------------------------
 */
-export const getMonthlyFinancialTrend = async () => {
+export const getMonthlyFinancialTrend = async (
+    year
+) => {
 
     const response = await api.get(
-        "/accounting/reports/monthly-financial-trend"
+        `/accounting/reports/monthly-financial-trend?year=${year}`
     );
 
-    return response.data;
+    return response.data.data;
 };
 
 /*

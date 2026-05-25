@@ -1,57 +1,96 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PayrollTable from "@/components/payroll/PayrollTable";
 import Drawer from "@/components/ui/Drawer";
 import Pagination from "@/components/table/Pagination";
-import Tabs from "@/components/ui/Tabs";
 import { Button } from "@/components/ui/button";
 import StatusBadge from "@/components/ui/StatusBadge";
 import CustomSelect from "@/components/ui/CustomSelect";
+import CustomDatePicker from "@/components/ui/CustomDatePicker";
 import { useToast } from "@/components/ui/ToastProvider";
 import api from "@/services/api";
-import { DownloadCloud } from "lucide-react";
-import { formatDate } from "@/lib/format";
+import {
+    DownloadCloud,
+    Search,
+    FileDown,
+} from "lucide-react";
+
+import {
+    formatDate,
+    formatDateForApi
+} from "@/lib/format";
+
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
 
 
 
 export default function Page() {
+
     const [loading, setLoading] = useState(true);
+
     const [data, setData] = useState([]);
     const [meta, setMeta] = useState(null);
+
     const [page, setPage] = useState(1);
-    const [tab, setTab] = useState("all");
+
+    const [search, setSearch] = useState("");
+    const [filterDate, setFilterDate] = useState("");
 
     const [selected, setSelected] = useState(null);
+
     const [openDrawer, setOpenDrawer] = useState(false);
-
-    const { showToast } = useToast();
-
-    const router = useRouter();
 
     const [downloadOpen, setDownloadOpen] = useState(false);
 
-
-
     const [cutoffDate, setCutoffDate] = useState("");
+
+    const { showToast } = useToast();
+
+    const [downloadingPayslip, setDownloadingPayslip] =
+        useState(false);
+
+    const router = useRouter();
 
     /* =========================
        FETCH PAYROLL
     ========================= */
     const fetchPayroll = async (pageNumber = 1) => {
+
         try {
 
             setLoading(true);
 
-            const res = await api.get(`/payroll?page=${pageNumber}`);
+            const params = new URLSearchParams({
+                page: pageNumber,
+            });
+
+            if (search) {
+                params.append("search", search);
+            }
+
+            if (filterDate) {
+
+                const formattedDate =
+                    formatDateForApi(filterDate);
+
+                if (formattedDate) {
+                    params.append(
+                        "date_from",
+                        formattedDate
+                    );
+                }
+            }
+
+            const res = await api.get(`/payroll?${params.toString()}`);
 
             setData(res.data.data.data || []);
             setMeta(res.data.data);
 
         } catch (err) {
+
             console.error(err);
+
             showToast({
                 title: "Error",
                 message: "Failed to fetch payroll",
@@ -76,19 +115,26 @@ export default function Page() {
     ========================= */
     const handlePageChange = (newPage) => {
         setPage(newPage);
-        window.scrollTo({ top: 0, behavior: "smooth" });
+
+        window.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        });
     };
 
     /* =========================
-       DOWNLOAD (SIMPLE VERSION)
+       DOWNLOAD REPORT
     ========================= */
     const handleDownload = () => {
+
         if (!cutoffDate) {
+
             showToast({
                 title: "Warning",
                 message: "Please select cutoff",
                 type: "warning",
             });
+
             return;
         }
 
@@ -96,13 +142,83 @@ export default function Page() {
             from: cutoffDate,
         });
 
-        const url = `http://127.0.0.1:8000/api/payroll/export?${params.toString()}`;
+        const url =
+            `${process.env.NEXT_PUBLIC_API_URL}/payroll/export?${params.toString()}`;
 
         window.open(url, "_blank");
 
         setDownloadOpen(false);
     };
 
+    /* =========================
+       DOWNLOAD PAYSLIP
+    ========================= */
+    const handleDownloadPayslip = async () => {
+
+        try {
+
+            if (!selected) return;
+
+            setDownloadingPayslip(true);
+
+            const response = await api.get(
+                `/payroll/${selected.id}/payslip`,
+                {
+                    responseType: "blob",
+                }
+            );
+
+            const blob = new Blob(
+                [response.data],
+                {
+                    type: "application/pdf",
+                }
+            );
+
+            const url =
+                window.URL.createObjectURL(blob);
+
+            const link =
+                document.createElement("a");
+
+            link.href = url;
+
+            link.download =
+                `Payslip-${selected.EmployeeNo}.pdf`;
+
+            document.body.appendChild(link);
+
+            link.click();
+
+            link.remove();
+
+            window.URL.revokeObjectURL(url);
+
+            showToast({
+                title: "Success",
+                message: "Payslip downloaded",
+                type: "success",
+            });
+
+        } catch (error) {
+
+            console.error(error);
+
+            showToast({
+                title: "Error",
+                message: "Failed to download payslip",
+                type: "error",
+            });
+
+        } finally {
+
+            setDownloadingPayslip(false);
+        }
+    };
+
+    /* =========================
+       CUTOFF OPTIONS
+    ========================= */
     const formatLabel = (date) =>
         date.toLocaleDateString("en-US", {
             month: "short",
@@ -111,28 +227,41 @@ export default function Page() {
         });
 
     const getCutoffOptions = () => {
+
         const options = [];
+
         const today = new Date();
 
-        // ✅ safer formatter (no timezone bug)
         const format = (d) => {
+
             const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, "0");
-            const day = String(d.getDate()).padStart(2, "0");
+
+            const month = String(
+                d.getMonth() + 1
+            ).padStart(2, "0");
+
+            const day = String(
+                d.getDate()
+            ).padStart(2, "0");
+
             return `${year}-${month}-${day}`;
         };
 
-        // 🔥 latest first
         for (let i = 0; i < 6; i++) {
-            const base = new Date(today.getFullYear(), today.getMonth() - i);
+
+            const base = new Date(
+                today.getFullYear(),
+                today.getMonth() - i
+            );
 
             const year = base.getFullYear();
+
             const month = base.getMonth();
 
             const firstCutoff = new Date(year, month, 15);
+
             const lastCutoff = new Date(year, month + 1, 0);
 
-            // 🔥 use your formatter (clean UI)
             options.push({
                 label: `15 (${formatLabel(firstCutoff)})`,
                 value: format(firstCutoff),
@@ -147,64 +276,125 @@ export default function Page() {
         return options;
     };
 
-    const cutoffOptions = useMemo(() => getCutoffOptions(), []);
+    const cutoffOptions = useMemo(
+        () => getCutoffOptions(),
+        []
+    );
 
     /* =========================
        EFFECTS
     ========================= */
     useEffect(() => {
         fetchPayroll(page);
-    }, [page]);
+    }, [page, search, filterDate]);
 
     return (
         <div className="p-6">
 
             {/* HEADER */}
-            <div className="flex justify-between items-center mb-4">
+            <div className="
+                flex
+                flex-col
+                lg:flex-row
+                lg:items-center
+                lg:justify-between
+                gap-4
+                mb-6
+            ">
 
-                {/* LEFT: TABS */}
-                <Tabs value={tab} onChange={setTab} />
+                <div className="
+                    flex
+                    flex-col
+                    md:flex-row
+                    gap-3
+                    flex-1
+                ">
 
-                {/* RIGHT: ACTIONS */}
+                    {/* DATE FILTER */}
+                    <div className="w-full md:w-[260px]">
+                        <CustomDatePicker
+                            value={filterDate}
+                            onChange={setFilterDate}
+                            placeholder="Filter payroll date"
+                        />
+                    </div>
+
+                    {/* SEARCH */}
+                    <div className="relative flex-1">
+
+                        <Search className="
+                            absolute
+                            left-3
+                            top-1/2
+                            -translate-y-1/2
+                            w-4
+                            h-4
+                            text-gray-400
+                        " />
+
+                        <input
+                            type="text"
+                            placeholder="Search employee..."
+                            value={search}
+                            onChange={(e) =>
+                                setSearch(e.target.value)
+                            }
+                            className="
+                                h-11
+                                w-full
+                                rounded-xl
+                                border
+                                border-gray-200
+                                bg-white
+                                pl-10
+                                pr-4
+                                text-sm
+                                outline-none
+                                transition-all
+                                focus:ring-2
+                                focus:ring-indigo-100
+                                focus:border-indigo-400
+                            "
+                        />
+
+                    </div>
+
+                </div>
+
+                {/* ACTIONS */}
                 <div className="flex items-center gap-2">
 
-                    {/* CREATE PAYROLL */}
                     <Button
-                        onClick={() => router.push("/dashboard/adminhr/payroll-create")}
+                        variant="outline"
+                        onClick={() => setDownloadOpen(true)}
                         className="
-                            bg-indigo-600 text-white
-                            px-4 py-2 rounded-lg
-                            shadow-md shadow-indigo-500/30
-                            hover:bg-indigo-500
-                            hover:shadow-lg hover:shadow-indigo-500/40
-                            active:scale-[0.98]
-                            transition-all duration-200
+                            h-11
+                            rounded-xl
+                        "
+                    >
+                        <DownloadCloud className="w-4 h-4 mr-2" />
+                        Export
+                    </Button>
+
+                    <Button
+                        onClick={() =>
+                            router.push(
+                                "/dashboard/adminhr/payroll-create"
+                            )
+                        }
+                        className="
+                            h-11
+                            rounded-xl
+                            bg-indigo-600
+                            hover:bg-indigo-700
                         "
                     >
                         + Create Payroll
                     </Button>
 
-                    <Button
-                        onClick={() => setDownloadOpen(true)}
-                        className="
-                            bg-gradient-to-r from-amber-400 to-amber-500
-                            text-white
-                            px-4 py-2 rounded-lg
-                            shadow-md shadow-amber-500/30
-                            hover:from-amber-300 hover:to-amber-400
-                            hover:shadow-lg hover:shadow-amber-500/40
-                            active:scale-[0.98]
-                            transition-all duration-200
-                        "
-                    >
-                        Download
-                    </Button>
-
                 </div>
 
-
             </div>
-
 
             {/* TABLE */}
             <PayrollTable
@@ -215,59 +405,144 @@ export default function Page() {
 
             {/* PAGINATION */}
             <div className="mt-4 flex justify-end">
+
                 <Pagination
                     meta={meta}
                     onPageChange={handlePageChange}
                 />
+
             </div>
 
-            {/* DRAWER */}
+            {/* PAYROLL DRAWER */}
             <Drawer
                 open={openDrawer}
                 onClose={() => setOpenDrawer(false)}
                 title="Payroll Details"
+
+                footer={
+                    <div className="flex gap-3 w-full">
+
+                        <Button
+                            variant="outline"
+                            className="
+                                flex-1
+                                h-11
+                                rounded-xl
+                            "
+                            onClick={() =>
+                                setOpenDrawer(false)
+                            }
+                        >
+                            Close
+                        </Button>
+
+                        <Button
+                            onClick={handleDownloadPayslip}
+                            disabled={downloadingPayslip}
+                            className="
+                                flex-1
+                                h-11
+                                rounded-xl
+                                bg-indigo-600
+                                hover:bg-indigo-700
+                            "
+                        >
+                            <FileDown className="w-4 h-4 mr-2" />
+
+                            {downloadingPayslip
+                                ? "Downloading..."
+                                : "Download Payslip"}
+                        </Button>
+
+                    </div>
+                }
             >
+
                 {selected && (
-                    <div className="space-y-6">
 
-                        {/* HEADER */}
-                        <div className="border rounded-2xl p-5 space-y-4">
+                    <div className="space-y-5">
 
-                            <div className="flex items-center justify-between">
+                        {/* EMPLOYEE */}
+                        <div className="
+                            border
+                            rounded-2xl
+                            p-5
+                            bg-white
+                        ">
+
+                            <div className="
+                                flex
+                                items-start
+                                justify-between
+                                mb-5
+                            ">
+
                                 <div>
-                                    <h3 className="font-semibold text-gray-900">
+
+                                    <h3 className="
+                                        text-lg
+                                        font-semibold
+                                        text-gray-900
+                                    ">
                                         {selected.EmployeeName}
                                     </h3>
-                                    <p className="text-xs text-gray-500">
+
+                                    <p className="text-sm text-gray-500">
                                         {selected.EmployeeNo}
+                                    </p>
+
+                                </div>
+
+                                <StatusBadge
+                                    status={selected.status || "Completed"}
+                                    size="sm"
+                                />
+
+                            </div>
+
+                            <div className="
+                                grid
+                                grid-cols-2
+                                gap-4
+                                text-sm
+                            ">
+
+                                <div>
+                                    <p className="text-gray-500 text-xs">
+                                        Position
+                                    </p>
+
+                                    <p className="font-medium">
+                                        {selected.Position}
                                     </p>
                                 </div>
 
-                                <StatusBadge status={selected.status || "Processed"} size="sm" />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-
                                 <div>
-                                    <p className="text-gray-500 text-xs">Pay Date</p>
-                                    <p className="font-medium">{formatDate(selected.PayDate)}</p>
+                                    <p className="text-gray-500 text-xs">
+                                        Pay Date
+                                    </p>
+
+                                    <p className="font-medium">
+                                        {formatDate(selected.PayDate)}
+                                    </p>
                                 </div>
 
                                 <div>
-                                    <p className="text-gray-500 text-xs">Monthly Salary</p>
-                                    <p className="font-medium">₱ {selected.MonthlySalary}</p>
-                                </div>
+                                    <p className="text-gray-500 text-xs">
+                                        Gross Pay
+                                    </p>
 
-                                <div>
-                                    <p className="text-gray-500 text-xs">Gross</p>
                                     <p className="font-semibold text-green-600">
                                         ₱ {selected.Gross}
                                     </p>
                                 </div>
 
                                 <div>
-                                    <p className="text-gray-500 text-xs">Net Pay</p>
-                                    <p className="font-semibold text-blue-600">
+                                    <p className="text-gray-500 text-xs">
+                                        Net Pay
+                                    </p>
+
+                                    <p className="font-semibold text-indigo-600">
                                         ₱ {selected.NetPay}
                                     </p>
                                 </div>
@@ -276,19 +551,169 @@ export default function Page() {
 
                         </div>
 
-                        {/* BREAKDOWN */}
-                        <div className="border rounded-2xl p-5 space-y-4">
+                        {/* EARNINGS */}
+                        <div className="
+                            border
+                            rounded-2xl
+                            p-5
+                            bg-white
+                        ">
 
-                            <h3 className="text-sm font-semibold text-gray-900">
+                            <h3 className="
+                                text-sm
+                                font-semibold
+                                text-gray-900
+                                mb-4
+                            ">
+                                Earnings
+                            </h3>
+
+                            <div className="
+                                grid
+                                grid-cols-2
+                                gap-4
+                                text-sm
+                            ">
+
+                                <div>
+                                    Overtime:
+                                    <span className="float-right font-medium">
+                                        ₱ {selected.TotalOvertime}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    Holiday Pay:
+                                    <span className="float-right font-medium">
+                                        ₱ {selected.TotalPerDay}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    Allowances:
+                                    <span className="float-right font-medium">
+                                        ₱ {selected.TotalDeMinimis}
+                                    </span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {/* GOVERNMENT */}
+                        <div className="
+                            border
+                            rounded-2xl
+                            p-5
+                            bg-white
+                        ">
+
+                            <h3 className="
+                                text-sm
+                                font-semibold
+                                text-gray-900
+                                mb-4
+                            ">
                                 Government Deductions
                             </h3>
 
-                            <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="
+                                grid
+                                grid-cols-2
+                                gap-4
+                                text-sm
+                            ">
 
-                                <div>SSS: ₱ {selected.SSS}</div>
-                                <div>PhilHealth: ₱ {selected.PhilHealth}</div>
-                                <div>Pagibig: ₱ {selected.Pagibig}</div>
-                                <div>Tax: ₱ {selected.Tax}</div>
+                                <div>
+                                    SSS
+                                    <span className="float-right font-medium">
+                                        ₱ {selected.SSS}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    PhilHealth
+                                    <span className="float-right font-medium">
+                                        ₱ {selected.PhilHealth}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    Pagibig
+                                    <span className="float-right font-medium">
+                                        ₱ {selected.Pagibig}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    Tax
+                                    <span className="float-right font-medium">
+                                        ₱ {selected.Tax}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    HMO
+                                    <span className="float-right font-medium">
+                                        ₱ {selected.HMO}
+                                    </span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        {/* LOANS */}
+                        <div className="
+                            border
+                            rounded-2xl
+                            p-5
+                            bg-white
+                        ">
+
+                            <h3 className="
+                                text-sm
+                                font-semibold
+                                text-gray-900
+                                mb-4
+                            ">
+                                Loan Deductions
+                            </h3>
+
+                            <div className="
+                                grid
+                                grid-cols-2
+                                gap-4
+                                text-sm
+                            ">
+
+                                <div>
+                                    Salary Loan
+                                    <span className="float-right font-medium">
+                                        ₱ {selected.SalaryLoanPayment}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    Laptop Loan
+                                    <span className="float-right font-medium">
+                                        ₱ {selected.LaptopLoanPayment}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    SSS Loan
+                                    <span className="float-right font-medium">
+                                        ₱ {selected.SSSPersonalLoanPayment}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    Pagibig Loan
+                                    <span className="float-right font-medium">
+                                        ₱ {selected.PagibigPersonalLoanPayment}
+                                    </span>
+                                </div>
 
                             </div>
 
@@ -296,8 +721,10 @@ export default function Page() {
 
                     </div>
                 )}
+
             </Drawer>
 
+            {/* EXPORT DRAWER */}
             <Drawer
                 open={downloadOpen}
                 onClose={() => setDownloadOpen(false)}
@@ -305,34 +732,62 @@ export default function Page() {
 
                 footer={
                     <div className="w-full flex gap-3">
-                        <button
-                            onClick={() => setDownloadOpen(false)}
-                            className="flex-1 py-3 text-sm border rounded-xl"
+
+                        <Button
+                            variant="outline"
+                            onClick={() =>
+                                setDownloadOpen(false)
+                            }
+                            className="
+                                flex-1
+                                h-11
+                                rounded-xl
+                            "
                         >
                             Cancel
-                        </button>
+                        </Button>
 
                         <Button
                             onClick={handleDownload}
-                            className="flex-1 h-12"
+                            className="
+                                flex-1
+                                h-11
+                                rounded-xl
+                            "
                         >
                             Download
                         </Button>
+
                     </div>
                 }
             >
+
                 <div className="space-y-6">
 
-                    {/* DATE RANGE */}
-                    <div className="border rounded-2xl p-5 space-y-4">
+                    <div className="
+                        border
+                        rounded-2xl
+                        p-5
+                        space-y-4
+                    ">
 
                         <div>
-                            <h3 className="text-sm font-semibold text-gray-900">
+
+                            <h3 className="
+                                text-sm
+                                font-semibold
+                                text-gray-900
+                            ">
                                 Payroll Date Range
                             </h3>
-                            <p className="text-xs text-gray-500">
+
+                            <p className="
+                                text-xs
+                                text-gray-500
+                            ">
                                 Select payroll coverage
                             </p>
+
                         </div>
 
                         <CustomSelect
@@ -345,6 +800,7 @@ export default function Page() {
                     </div>
 
                 </div>
+
             </Drawer>
 
         </div>

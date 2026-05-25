@@ -17,7 +17,7 @@ export default function EmployeeStatCard({
                 border
                 border-slate-200
                 bg-white
-                p-7
+                p-6
                 shadow-[0_2px_10px_rgba(15,23,42,0.04)]
                 transition-all
                 duration-300
@@ -30,8 +30,8 @@ export default function EmployeeStatCard({
             <div
                 className={`
                     absolute
-                    right-7
-                    top-7
+                    right-6
+                    top-6
                     flex
                     h-16
                     w-16
@@ -41,12 +41,13 @@ export default function EmployeeStatCard({
                     ${iconClass}
                 `}
             >
-                <Icon size={28} />
+                <Icon size={26} />
             </div>
 
             {/* CONTENT */}
             <div className="pr-20">
 
+                {/* TITLE */}
                 <p
                     className="
                         text-base
@@ -57,10 +58,11 @@ export default function EmployeeStatCard({
                     {title}
                 </p>
 
+                {/* VALUE */}
                 <h3
                     className="
-                        mt-4
-                        text-5xl
+                        mt-3
+                        text-4xl
                         font-bold
                         leading-none
                         tracking-tight
@@ -70,13 +72,14 @@ export default function EmployeeStatCard({
                     {value}
                 </h3>
 
+                {/* DESCRIPTION */}
                 {description && (
 
                     <p
                         className="
-                            mt-4
-                            text-base
-                            leading-7
+                            mt-3
+                            text-sm
+                            leading-6
                             text-slate-500
                         "
                     >

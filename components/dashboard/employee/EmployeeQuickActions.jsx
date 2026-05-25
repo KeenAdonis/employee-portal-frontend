@@ -8,44 +8,46 @@ import {
     Clock3,
     Wallet,
     ArrowRight,
+    Coins,
 } from "lucide-react";
 
 const actions = [
     {
-        title: "Add Employee",
-        description: "Create new employee account",
-        icon: UserPlus,
-        href: "/dashboard/adminhr/employee-list",
+        title: "Requisitions",
+        description: "Create and manage requisition requests",
+        icon: Coins,
+        href: "/dashboard/employee/requisition",
         iconBg: "bg-blue-100",
         iconColor: "text-blue-600",
     },
 
     {
-        title: "Approve Leaves",
-        description: "Review pending leave requests",
-        icon: CalendarCheck2,
-        href: "/dashboard/adminhr/leave-list",
-        iconBg: "bg-orange-100",
-        iconColor: "text-orange-600",
+        title: "Liquidations",
+        description: "Manage liquidation submissions and records",
+        icon: Wallet,
+        href: "/dashboard/employee/liquidation",
+        iconBg: "bg-purple-100",
+        iconColor: "text-purple-600",
     },
 
     {
-        title: "Approve Overtime",
-        description: "Review overtime requests",
+        title: "Overtime Records",
+        description: "Review and monitor overtime requests",
         icon: Clock3,
-        href: "/dashboard/adminhr/overtime-list",
+        href: "/dashboard/employee/overtime",
         iconBg: "bg-green-100",
         iconColor: "text-green-600",
     },
 
     {
-        title: "Payroll",
-        description: "Open payroll management",
-        icon: Wallet,
-        href: "/dashboard/adminhr/payroll-list",
-        iconBg: "bg-purple-100",
-        iconColor: "text-purple-600",
+        title: "Leave Records",
+        description: "Track and manage leave applications",
+        icon: CalendarCheck2,
+        href: "/dashboard/employee/leave",
+        iconBg: "bg-orange-100",
+        iconColor: "text-orange-600",
     },
+
 ];
 
 export default function QuickActions() {

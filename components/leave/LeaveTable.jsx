@@ -4,11 +4,11 @@ import DataTable from "@/components/table/DataTable";
 
 import { Eye } from "lucide-react";
 
-import { formatDate } from "@/lib/format";
-
 import StatusBadge from "@/components/ui/StatusBadge";
 
 import { getInitials } from "@/lib/utils";
+import { formatDate } from "@/lib/format";
+import { getStorageUrl } from "@/lib/storage";
 
 export default function LeaveTable({
     data = [],
@@ -33,28 +33,32 @@ export default function LeaveTable({
             loading={loading}
             emptyTitle="No leave requests found"
             emptyDescription="There are currently no leave records available."
-            renderRow={(item) => (
-                <tr
-                    key={item.id}
-                    className="
+            renderRow={(item) => {
+                
+                const profileImage = getStorageUrl(item.employee?.ProfileImage);
+
+                return (
+                    <tr
+                        key={item.id}
+                        className="
                         hover:bg-gray-50
                         transition-colors
                     "
-                >
+                    >
 
-                    {/* DATE FILED */}
-                    <td className="px-4 py-3">
-                        {formatDate(item.DateFiled)}
-                    </td>
+                        {/* DATE FILED */}
+                        <td className="px-4 py-3">
+                            {formatDate(item.DateFiled)}
+                        </td>
 
-                    {/* EMPLOYEE */}
-                    <td className="px-4 py-3">
+                        {/* EMPLOYEE */}
+                        <td className="px-4 py-3">
 
-                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3">
 
-                            {/* PROFILE */}
-                            <div
-                                className="
+                                {/* PROFILE */}
+                                <div
+                                    className="
                                     w-10
                                     h-10
                                     rounded-full
@@ -71,102 +75,99 @@ export default function LeaveTable({
                                     shadow-sm
                                     shrink-0
                                 "
-                            >
+                                >
 
-                                {item.employee?.ProfileImage ? (
+                                    {profileImage ? (
 
-                                    <img
-                                        src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/storage/${item.employee.ProfileImage}`}
-                                        alt={item.EmployeeName}
+                                        <img
+                                            src={profileImage}
+                                            alt={item.EmployeeName}
+                                            className="w-full h-full object-cover"
+                                        />
+
+                                    ) : (
+
+                                        getInitials(item.EmployeeName, "")
+
+                                    )}
+
+                                </div>
+
+                                {/* INFO */}
+                                <div className="min-w-0">
+
+                                    <div
                                         className="
-                                            w-full
-                                            h-full
-                                            object-cover
-                                        "
-                                    />
-
-                                ) : (
-
-                                    getInitials(item.EmployeeName)
-
-                                )}
-
-                            </div>
-
-                            {/* INFO */}
-                            <div className="min-w-0">
-
-                                <div
-                                    className="
                                         font-medium
                                         text-gray-900
                                         truncate
                                     "
-                                >
-                                    {item.EmployeeName}
-                                </div>
+                                    >
+                                        {item.EmployeeName}
+                                    </div>
 
-                                <div
-                                    className="
+                                    <div
+                                        className="
                                         text-xs
                                         text-gray-500
                                         truncate
                                     "
-                                >
-                                    {item.employee?.Position || "—"}
+                                    >
+                                        {item.employee?.Position || "—"}
+                                    </div>
+
                                 </div>
 
                             </div>
 
-                        </div>
+                        </td>
 
-                    </td>
+                        {/* DATE RANGE */}
+                        <td className="px-4 py-3 text-sm">
 
-                    {/* DATE RANGE */}
-                    <td className="px-4 py-3 text-sm">
+                            {formatDate(item.DateFrom)} -{" "}
+                            {formatDate(item.DateTo)}
 
-                        {formatDate(item.DateFrom)} -{" "}
-                        {formatDate(item.DateTo)}
+                        </td>
 
-                    </td>
+                        {/* DAYS */}
+                        <td className="px-4 py-3">
+                            {item.TotalDays}
+                        </td>
 
-                    {/* DAYS */}
-                    <td className="px-4 py-3">
-                        {item.TotalDays}
-                    </td>
+                        {/* TYPE */}
+                        <td className="px-4 py-3">
+                            {item.LeaveType}
+                        </td>
 
-                    {/* TYPE */}
-                    <td className="px-4 py-3">
-                        {item.LeaveType}
-                    </td>
+                        {/* STATUS */}
+                        <td className="px-4 py-3">
 
-                    {/* STATUS */}
-                    <td className="px-4 py-3">
+                            <StatusBadge
+                                status={item.Status}
+                            />
 
-                        <StatusBadge
-                            status={item.Status}
-                        />
+                        </td>
 
-                    </td>
+                        {/* ACTION */}
+                        <td className="px-4 py-3">
 
-                    {/* ACTION */}
-                    <td className="px-4 py-3">
-
-                        <button
-                            onClick={() => onView(item)}
-                            className="
+                            <button
+                                onClick={() => onView(item)}
+                                className="
                                 text-gray-500
                                 hover:text-indigo-600
                                 transition-colors
                             "
-                        >
-                            <Eye className="w-4 h-4" />
-                        </button>
+                            >
+                                <Eye className="w-4 h-4" />
+                            </button>
 
-                    </td>
+                        </td>
 
-                </tr>
-            )}
+                    </tr>
+                );
+            }}
         />
     );
 }

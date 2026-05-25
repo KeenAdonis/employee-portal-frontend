@@ -8,9 +8,14 @@ import { formatDate } from "@/lib/format";
 import Pagination from "@/components/table/Pagination";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Tabs from "@/components/ui/Tabs";
+import Input from "@/components/ui/Input";
+import CustomSelect from "@/components/ui/CustomSelect";
+
 import { useToast } from "@/components/ui/ToastProvider";
 import { useActionState } from "@/lib/useActionState";
 import api from "@/services/api";
+
+import { leaveStatusOptions } from "@/config/options";
 
 import { Eye, Download } from "lucide-react";
 
@@ -24,6 +29,9 @@ export default function Page() {
     const [meta, setMeta] = useState(null);
     const [page, setPage] = useState(1);
     const [tab, setTab] = useState("requests");
+    const [search, setSearch] = useState("");
+    const [selectedStatus, setSelectedStatus] = useState("all");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const { showToast } = useToast();
 
     const approveAction = useActionState();
@@ -79,8 +87,40 @@ export default function Page() {
                     ? "Pending"
                     : "Approved,Rejected";
 
+            const params = {
+                page: pageNumber,
+            };
+
+            if (statusFilter) {
+                params.status = statusFilter;
+            }
+
+            if (selectedStatus !== "all") {
+
+                if (
+                    tab === "requests" &&
+                    ["Pending"].includes(selectedStatus)
+                ) {
+
+                    params.status = selectedStatus;
+                }
+
+                if (
+                    tab === "history" &&
+                    ["Approved", "Rejected"].includes(selectedStatus)
+                ) {
+
+                    params.status = selectedStatus;
+                }
+            }
+
+            if (selectedStatus !== "all") {
+                params.status = selectedStatus;
+            }
+
             const res = await api.get(
-                `/leave?page=${pageNumber}&status=${statusFilter}`
+                "/leave",
+                { params }
             );
 
             setData(
@@ -181,20 +221,100 @@ export default function Page() {
 
 
     /* ================= EFFECTS ================= */
-    useEffect(() => {
-        fetchLeave(page);
-    }, [page, tab]);
 
     useEffect(() => {
+
+        const timer = setTimeout(() => {
+
+            setDebouncedSearch(search);
+
+        }, 400);
+
+        return () => clearTimeout(timer);
+
+    }, [search]);
+
+    useEffect(() => {
+
+        fetchLeave(page);
+
+    }, [
+        page,
+        tab,
+        debouncedSearch,
+        selectedStatus,
+    ]);
+
+    useEffect(() => {
+
         setPage(1);
-    }, [tab]);
+
+    }, [
+        tab,
+        debouncedSearch,
+        selectedStatus,
+    ]);
 
     return (
         <div className="p-6">
 
             {/* HEADER */}
-            <div className="flex justify-between items-center mb-4">
-                <Tabs value={tab} onChange={setTab} />
+            <div
+                className="
+                    flex
+                    flex-col
+                    xl:flex-row
+                    xl:items-center
+                    xl:justify-between
+                    gap-4
+                    mb-4
+                "
+            >
+
+                {/* LEFT */}
+                <Tabs
+                    value={tab}
+                    onChange={setTab}
+                />
+
+                {/* RIGHT */}
+                <div
+                    className="
+                        flex
+                        flex-col
+                        lg:flex-row
+                        lg:items-center
+                        gap-3
+                    "
+                >
+
+                    {/* SEARCH */}
+                    <div className="w-[280px]">
+
+                        <Input
+                            value={search}
+                            onChange={(e) =>
+                                setSearch(e.target.value)
+                            }
+                            placeholder="Search leave..."
+                        />
+
+                    </div>
+
+                    {/* STATUS FILTER */}
+                    <div className="w-[220px]">
+
+                        <CustomSelect
+                            value={selectedStatus}
+                            onChange={setSelectedStatus}
+                            options={leaveStatusOptions}
+                            placeholder="Filter Status"
+                        />
+
+                    </div>
+
+                </div>
+
             </div>
 
             {/* TABLE */}

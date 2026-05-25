@@ -21,6 +21,12 @@ export default function useEmployeeDashboardData() {
     const [leaveCredits, setLeaveCredits] =
         useState({});
 
+    const [todayLeaves, setTodayLeaves] =
+        useState([]);
+
+    const [todayOvertimes, setTodayOvertimes] =
+        useState([]);
+
     const [stats, setStats] = useState({
         pendingLeaves: 0,
         pendingOvertime: 0,
@@ -38,11 +44,13 @@ export default function useEmployeeDashboardData() {
         try {
 
             setLoading(true);
-
+            
             const response =
                 await getEmployeeDashboard();
 
             const data = response.data;
+
+            console.log(data);
 
             /*
             |--------------------------------------------------------------------------
@@ -58,6 +66,14 @@ export default function useEmployeeDashboardData() {
             */
             setLeaveCredits(
                 data.leave_credits
+            );
+
+            setTodayLeaves(
+                data.recent_leaves_today || []
+            );
+
+            setTodayOvertimes(
+                data.recent_overtime_today || []
             );
 
             /*
@@ -109,6 +125,8 @@ export default function useEmployeeDashboardData() {
         leaveCredits,
         stats,
         loading,
+        todayLeaves,
+        todayOvertimes,
         refreshDashboard: fetchDashboard,
     };
 }

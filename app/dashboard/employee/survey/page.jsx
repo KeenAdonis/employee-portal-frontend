@@ -391,72 +391,116 @@ export default function EmployeeSurveyPage() {
             <SurveyInstructions />
 
             {/* =====================================================
-                DRAG & DROP RANKING
+                MAIN WORKSPACE
             ===================================================== */}
-            <div
-                className="
-                    bg-white border rounded-2xl
-                    p-6
-                "
-            >
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
 
-                <div className="mb-6">
-
-                    <h2 className="text-lg font-semibold text-gray-900">
-                        Employee Rankings
-                    </h2>
-
-                    <p className="text-sm text-gray-500 mt-1">
-                        Rank employees from highest to lowest.
-                    </p>
-
-                </div>
-
-                <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                    modifiers={[restrictToVerticalAxis]}
+                {/* =================================================
+                    LEFT SIDE - RANKINGS
+                ================================================= */}
+                <div
+                    className="
+                        xl:col-span-2
+                        bg-white border rounded-2xl
+                        p-6
+                        h-[90vh]
+                        flex flex-col
+                    "
                 >
 
-                    <SortableContext
-                        items={employees.map(
-                            (employee) => employee.id
-                        )}
-                        strategy={verticalListSortingStrategy}
-                    >
+                    {/* HEADER */}
+                    <div className="mb-6 flex-shrink-0">
 
-                        <div className="space-y-4">
+                        <div className="flex items-center justify-between gap-4">
 
-                            {employees.map((employee, index) => (
-                                <SortableEmployeeCard
-                                    key={employee.id}
-                                    employee={employee}
-                                    index={index}
-                                />
-                            ))}
+                            <div>
+
+                                <h2 className="text-lg font-semibold text-gray-900">
+                                    Employee Rankings
+                                </h2>
+
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Drag employees to rank them from highest to lowest.
+                                </p>
+
+                            </div>
+
+                            <div
+                                className="
+                                    px-4 py-2 rounded-xl
+                                    bg-amber-50 border border-amber-200
+                                    text-sm font-medium text-amber-700
+                                    whitespace-nowrap
+                                "
+                            >
+                                {employees.length} Employees
+                            </div>
 
                         </div>
 
-                    </SortableContext>
+                    </div>
 
-                </DndContext>
+                    {/* SCROLLABLE LIST */}
+                    <div className="flex-1 overflow-y-auto pr-2">
+
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                            modifiers={[restrictToVerticalAxis]}
+                        >
+
+                            <SortableContext
+                                items={employees.map(
+                                    (employee) => employee.id
+                                )}
+                                strategy={verticalListSortingStrategy}
+                            >
+
+                                <div className="space-y-4">
+
+                                    {employees.map((employee, index) => (
+                                        <SortableEmployeeCard
+                                            key={employee.id}
+                                            employee={employee}
+                                            index={index}
+                                        />
+                                    ))}
+
+                                </div>
+
+                            </SortableContext>
+
+                        </DndContext>
+
+                    </div>
+
+                </div>
+
+                {/* =================================================
+                    RIGHT SIDE - SUMMARY / COMMENTS
+                ================================================= */}
+                <div className="xl:col-span-1">
+
+                    <div className="sticky top-6">
+
+                        {/* SUBMIT SECTION */}
+                        <SurveySubmitSection
+                            topEmployee={topEmployee}
+                            bottomEmployee={bottomEmployee}
+                            topReason={topReason}
+                            setTopReason={setTopReason}
+                            bottomReason={bottomReason}
+                            setBottomReason={setBottomReason}
+                            onSubmit={handleSubmit}
+                            submitting={submitting}
+                        />
+
+                    </div>
+
+                </div>
 
             </div>
-
-            {/* =====================================================
-                SUBMIT SECTION
-            ===================================================== */}
-            <SurveySubmitSection
-                topEmployee={topEmployee}
-                bottomEmployee={bottomEmployee}
-                topReason={topReason}
-                setTopReason={setTopReason}
-                bottomReason={bottomReason}
-                setBottomReason={setBottomReason}
-                onSubmit={handleSubmit}
-                submitting={submitting}
-            />
 
         </div>
     );

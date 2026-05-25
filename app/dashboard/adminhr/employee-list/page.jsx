@@ -6,9 +6,13 @@ import EditEmployeeModal from "@/components/adminhr/EditEmployeeModal";
 import EmployeeCard from "@/components/adminhr/EmployeeCard";
 import { Button } from "@/components/ui/button";
 import api from "@/services/api";
-import { Hourglass, Pencil, PlusCircle, ShieldCheck, UserX } from "lucide-react";
+import { FileDown, FileUp, Hourglass, Pencil, PlusCircle, ShieldCheck, UserRoundPlus, UserX } from "lucide-react";
 import Drawer from "@/components/ui/Drawer";
 import { useToast } from "@/components/ui/ToastProvider";
+import { getStorageUrl } from "@/lib/storage";
+import { getInitials } from "@/lib/utils";
+import { getStatusMeta } from "@/lib/status";
+import { useRef } from "react";
 
 export default function EmployeeListPage() {
     const [open, setOpen] = useState(false);
@@ -40,6 +44,10 @@ export default function EmployeeListPage() {
             setLoading(false);
         }
     };
+
+    const fileInputRef = useRef(null);
+
+
 
     const handleView = (emp) => {
         setSelected(emp);
@@ -262,6 +270,50 @@ export default function EmployeeListPage() {
         }
     };
 
+    const handleImport = async (e) => {
+
+        const file = e.target.files[0];
+
+        if (!file) return;
+
+        try {
+
+            const formData = new FormData();
+
+            formData.append("file", file);
+
+            const res = await api.post(
+                "/employees/import",
+                formData,
+                {
+                    headers: {
+                        "Content-Type":
+                            "multipart/form-data",
+                    },
+                }
+            );
+
+            showToast({
+                title: "Import Successful",
+                message: res.data.message,
+                type: "success",
+            });
+
+            fetchEmployees();
+
+        } catch (err) {
+
+            showToast({
+                title: "Import Failed",
+                message:
+                    err.response?.data?.message
+                    || "CSV import failed",
+                type: "error",
+            });
+
+        }
+    };
+
     return (
         <div className="p-6">
             <div className="bg-white rounded-2xl border shadow-sm overflow-hidden">
@@ -297,12 +349,41 @@ export default function EmployeeListPage() {
 
                             {/* ACTIONS */}
                             <div className="flex gap-2">
+
+
+                                <Button
+                                    variant="outline"
+                                    className="rounded-xl"
+                                    onClick={() => fileInputRef.current.click()}
+                                >
+                                    <FileUp size={22} />
+                                </Button>
+
+                                <input
+                                    type="file"
+                                    accept=".csv,.xlsx,.xls"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    onChange={handleImport}
+                                />
+
                                 <Button
                                     variant="outline"
                                     className="rounded-xl"
                                     onClick={handleDownload}
                                 >
-                                    Export Masterlist
+                                    <FileDown size={22} />
+                                </Button>
+
+                                <Button
+                                    variant="outline"
+                                    onClick={() =>
+                                        window.open(
+                                            `${process.env.NEXT_PUBLIC_API_URL}/employees/template`
+                                        )
+                                    }
+                                >
+                                    Download Template
                                 </Button>
 
                                 <Button
@@ -319,7 +400,7 @@ export default function EmployeeListPage() {
                                     transition-all duration-200
                                     "
                                 >
-                                    <PlusCircle /> Add Employee
+                                    <UserRoundPlus size={22} /> Add Employee
                                 </Button>
                             </div>
                         </div>
@@ -332,8 +413,10 @@ export default function EmployeeListPage() {
 
                     {/* LOADING */}
                     {loading && (
-                        <div className="text-center text-gray-500 py-10">
-                            Loading employees...
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                            {Array.from({ length: 8 }).map((_, index) => (
+                                <EmployeeCardSkeleton key={index} />
+                            ))}
                         </div>
                     )}
 
@@ -404,6 +487,28 @@ function Info({ label, value }) {
         </div>
     );
 }
+
+function EmployeeCardSkeleton() {
+    return (
+        <div className="border rounded-2xl p-5 bg-white shadow-sm animate-pulse">
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gray-200" />
+
+                <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded w-1/2" />
+                </div>
+            </div>
+
+            <div className="mt-5 space-y-3">
+                <div className="h-3 bg-gray-200 rounded w-full" />
+                <div className="h-3 bg-gray-200 rounded w-5/6" />
+                <div className="h-3 bg-gray-200 rounded w-2/3" />
+            </div>
+        </div>
+    );
+}
+
 function EmployeeDrawerContent({
     selected,
     onToggleStatus,
@@ -413,6 +518,8 @@ function EmployeeDrawerContent({
     actionLoading,
 }) {
     const [menuOpen, setMenuOpen] = useState(false);
+
+    const profileImage = getStorageUrl(selected.ProfileImage);
 
     /* =========================
        DYNAMIC AVATAR COLOR
@@ -445,13 +552,29 @@ function EmployeeDrawerContent({
                 <div
                     className={`
                         w-16 h-16 rounded-full
+                        overflow-hidden
                         flex items-center justify-center
                         text-white text-lg font-semibold
                         ${getColor(selected.FirstName + selected.LastName)}
                     `}
                 >
-                    {selected.FirstName?.charAt(0)}
-                    {selected.LastName?.charAt(0)}
+
+                    {profileImage ? (
+
+                        <img
+                            src={profileImage}
+                            alt={`${selected.FirstName} ${selected.LastName}`}
+                            className="w-full h-full object-cover"
+                        />
+
+                    ) : (
+
+                        getInitials(
+                            `${selected.FirstName} ${selected.LastName}`
+                        )
+
+                    )}
+
                 </div>
 
                 {/* INFO */}
@@ -465,17 +588,63 @@ function EmployeeDrawerContent({
                     </p>
 
                     {/* STATUS BADGES */}
-                    <div className="flex gap-2 mt-2">
+                    <div className="flex items-center gap-3 mt-2">
 
-                        <span className={`text-xs px-2 py-1 rounded-full ${selected.Status === "ACTIVE"
-                            ? "bg-green-100 text-green-600"
-                            : "bg-red-100 text-red-600"
-                            }`}>
-                            {selected.Status}
-                        </span>
+                        {/* ACTIVE INDICATOR */}
+                        <div className="flex items-center gap-2">
 
-                        <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-600">
-                            {selected.CompanyStatus}
+                            <div className="relative flex items-center justify-center">
+
+                                {/* PING */}
+                                <div
+                                    className={`
+                                        absolute
+                                        w-3
+                                        h-3
+                                        rounded-full
+                                        animate-ping
+                                        opacity-75
+                                        ${selected.Status?.toUpperCase() === "ACTIVE"
+                                            ? "bg-green-400"
+                                            : "bg-red-400"
+                                        }
+                                    `}
+                                />
+
+                                {/* DOT */}
+                                <div
+                                    className={`
+                                        relative
+                                        w-2.5
+                                        h-2.5
+                                        rounded-full
+                                        ${selected.Status?.toUpperCase() === "ACTIVE"
+                                            ? "bg-green-500"
+                                            : "bg-red-500"
+                                        }
+                                    `}
+                                />
+
+                            </div>
+
+                            <span className="text-xs text-gray-500">
+                                {selected.Status}
+                            </span>
+
+                        </div>
+
+                        {/* COMPANY STATUS */}
+                        <span
+                            className={`
+                                text-xs
+                                px-2.5
+                                py-1
+                                rounded-full
+                                border
+                                ${getStatusMeta(selected.CompanyStatus).className}
+                            `}
+                        >
+                            {getStatusMeta(selected.CompanyStatus).label}
                         </span>
 
                     </div>
@@ -618,6 +787,20 @@ function EmployeeDrawerContent({
                         <Info label="Job Level" value={selected.JobLevel} />
                         <Info label="Company Status" value={selected.CompanyStatus} />
                         <Info label="Date Hired" value={selected.DateHired} />
+                    </div>
+                </div>
+
+                {/* GOVERNMENT ID'S */}
+                <div className="border rounded-2xl p-5 space-y-4">
+                    <h3 className="font-medium text-gray-900 text-sm">
+                        Government Id's
+                    </h3>
+
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                        <Info label="SSS Number" value={selected.SSSNumber} />
+                        <Info label="PhilHealth Number" value={selected.PhilHealthNumber} />
+                        <Info label="Pag-IBIG Number" value={selected.PagIbigNumber} />
+                        <Info label="TIN" value={selected.TIN} />
                     </div>
                 </div>
 

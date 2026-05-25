@@ -1,9 +1,19 @@
 "use client";
 
 import { Eye, Pencil } from "lucide-react";
+import { getStorageUrl } from "@/lib/storage";
+import { getStatusMeta } from "@/lib/status";
+
 
 export default function EmployeeCard({ employee, onView }) {
+
   const fullName = `${employee.FirstName} ${employee.LastName}`;
+  const statusMeta = getStatusMeta(employee.Status);
+  const companyStatusMeta = getStatusMeta(
+    employee.CompanyStatus
+  );
+
+  const profileImage = getStorageUrl(employee.ProfileImage);
 
   /* =========================
      INITIALS
@@ -33,17 +43,7 @@ export default function EmployeeCard({ employee, onView }) {
     }
 
     return colors[Math.abs(hash) % colors.length];
-  };
-
-  /* =========================
-     STATUS STYLE
-  ========================= */
-  const getStatusStyle = () => {
-    if (employee.CompanyStatus === "Regular") {
-      return "bg-green-100 text-green-600";
-    }
-    return "bg-yellow-100 text-yellow-600";
-  };
+  }; 
 
   return (
     <div
@@ -60,19 +60,65 @@ export default function EmployeeCard({ employee, onView }) {
       {/* HEADER */}
       <div className="flex justify-between items-center mb-4">
         <span
-          className={`text-xs px-3 py-1 rounded-full font-medium ${getStatusStyle()}`}
+            className={`
+                text-xs
+                px-3
+                py-1
+                rounded-full
+                font-medium
+                border
+                ${companyStatusMeta.className}
+            `}
         >
-          {employee.CompanyStatus}
+            {companyStatusMeta.label}
         </span>
 
-        <span
-          className={`text-xs px-2 py-1 rounded-full ${employee.Status === "Active"
-            ? "bg-blue-100 text-blue-600"
-            : "bg-gray-100 text-gray-500"
-            }`}
-        >
-          {employee.Status}
-        </span>
+        <div className="flex items-center justify-center">
+
+            <div
+                className={`
+                    relative
+                    flex
+                    items-center
+                    justify-center
+                `}
+            >
+            
+                {/* PING */}
+                <div
+                    className={`
+                        absolute
+                        w-3
+                        h-3
+                        rounded-full
+                        animate-ping
+                        opacity-75
+                        ${
+                            employee.Status?.toUpperCase() === "ACTIVE"
+                                ? "bg-green-400"
+                                : "bg-red-400"
+                        }
+                    `}
+                />
+        
+                {/* DOT */}
+                <div
+                    className={`
+                        relative
+                        w-2.5
+                        h-2.5
+                        rounded-full
+                        ${
+                            employee.Status?.toUpperCase() === "ACTIVE"
+                                ? "bg-green-500"
+                                : "bg-red-500"
+                        }
+                    `}
+                />
+        
+            </div>
+                      
+        </div>
       </div>
 
       {/* PROFILE */}
@@ -95,21 +141,21 @@ export default function EmployeeCard({ employee, onView }) {
             ${getColor(fullName)}
           `}
         >
-          
-          {employee.ProfileImage ? (
-          
+
+          {profileImage ? (
+
             <img
-              src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/storage/${employee.ProfileImage}`}
+              src={profileImage}
               alt={fullName}
               className="w-full h-full object-cover"
             />
-          
+
           ) : (
-          
+
             getInitials(employee.FirstName, employee.LastName)
-          
+
           )}
-        
+
         </div>
 
         <h2 className="font-semibold text-gray-900 text-sm">

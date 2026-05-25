@@ -1,7 +1,6 @@
 "use client";
 
 import DataTable from "@/components/table/DataTable";
-
 import { Eye } from "lucide-react";
 
 import {
@@ -12,12 +11,17 @@ import {
 import StatusBadge from "@/components/ui/StatusBadge";
 
 import { getInitials } from "@/lib/utils";
+import { getStorageUrl } from "@/lib/storage";
+
+
 
 export default function RequisitionTable({
     data = [],
     onView,
     loading = false,
 }) {
+
+
 
     const columns = [
         "Date Filed",
@@ -30,34 +34,41 @@ export default function RequisitionTable({
     ];
 
     return (
-        <DataTable
-            columns={columns}
-            data={data}
-            loading={loading}
-            emptyTitle="No requisitions found"
-            emptyDescription="There are currently no requisition records available."
-            renderRow={(item) => (
-                <tr
-                    key={item.id}
-                    className="
+        <div className="space-y-4">
+
+            <DataTable
+                columns={columns}
+                data={data}
+                loading={loading}
+                emptyTitle="No requisitions found"
+                emptyDescription="There are currently no requisition records available."
+
+                renderRow={(item) => {
+                    const profileImage = getStorageUrl(item.employee?.ProfileImage);
+
+                    return (
+
+                        <tr
+                            key={item.id}
+                            className="
                         hover:bg-gray-50
                         transition-colors
                     "
-                >
+                        >
 
-                    {/* DATE FILED */}
-                    <td className="px-4 py-3">
-                        {formatDate(item.DateFiled)}
-                    </td>
+                            {/* DATE FILED */}
+                            <td className="px-4 py-3">
+                                {formatDate(item.DateFiled)}
+                            </td>
 
-                    {/* EMPLOYEE */}
-                    <td className="px-4 py-3">
+                            {/* EMPLOYEE */}
+                            <td className="px-4 py-3">
 
-                        <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-3">
 
-                            {/* AVATAR */}
-                            <div
-                                className="
+                                    {/* AVATAR */}
+                                    <div
+                                        className="
                                     w-10
                                     h-10
                                     rounded-full
@@ -74,87 +85,83 @@ export default function RequisitionTable({
                                     shadow-sm
                                     shrink-0
                                 "
-                            >
+                                    >
 
-                                {item.employee?.ProfileImage ? (
+                                        {profileImage ? (
 
-                                    <img
-                                        src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/storage/${item.employee.ProfileImage}`}
-                                        alt={item.EmployeeName}
-                                        className="
-                                            w-full
-                                            h-full
-                                            object-cover
-                                        "
-                                    />
+                                            <img
+                                                src={profileImage}
+                                                alt={item.EmployeeName}
+                                                className="w-full h-full object-cover"
+                                            />
 
-                                ) : (
+                                        ) : (
 
-                                    getInitials(item.EmployeeName)
+                                            getInitials(item.EmployeeName, "")
 
-                                )}
+                                        )}
 
-                            </div>
+                                    </div>
 
-                            {/* INFO */}
-                            <div className="min-w-0">
+                                    {/* INFO */}
+                                    <div className="min-w-0">
 
-                                <div
-                                    className="
+                                        <div
+                                            className="
                                         font-medium
                                         text-gray-900
                                         truncate
                                     "
-                                >
-                                    {item.EmployeeName}
-                                </div>
+                                        >
+                                            {item.EmployeeName}
+                                        </div>
 
-                                <div
-                                    className="
+                                        <div
+                                            className="
                                         text-xs
                                         text-gray-500
                                         truncate
                                     "
-                                >
-                                    {item.Department || "—"}
+                                        >
+                                            {item.Department || "—"}
+                                        </div>
+
+                                    </div>
+
                                 </div>
+                            </td>
 
-                            </div>
+                            {/* TYPE */}
+                            <td className="px-4 py-3">
+                                {item.Type}
+                            </td>
 
-                        </div>
-                    </td>
+                            {/* TOTAL */}
+                            <td className="px-4 py-3 font-medium">
+                                {formatCurrency(item.TotalAmount)}
+                            </td>
 
-                    {/* TYPE */}
-                    <td className="px-4 py-3">
-                        {item.Type}
-                    </td>
+                            {/* OVERDUE */}
+                            <td className="px-4 py-3 w-[220px]">
 
-                    {/* TOTAL */}
-                    <td className="px-4 py-3 font-medium">
-                        {formatCurrency(item.TotalAmount)}
-                    </td>
+                                {(() => {
 
-                    {/* OVERDUE */}
-                    <td className="px-4 py-3 w-[220px]">
+                                    const progress =
+                                        item.overdue_progress;
 
-                        {(() => {
+                                    if (!progress) return "—";
 
-                            const progress =
-                                item.overdue_progress;
+                                    /* ====================================
+                                       COMPLETED
+                                    ==================================== */
+                                    if (progress.completed) {
 
-                            if (!progress) return "—";
+                                        return (
+                                            <div className="space-y-1">
 
-                            /* ====================================
-                               COMPLETED
-                            ==================================== */
-                            if (progress.completed) {
-
-                                return (
-                                    <div className="space-y-1">
-
-                                        <div>
-                                            <span
-                                                className="
+                                                <div>
+                                                    <span
+                                                        className="
                                                     inline-flex
                                                     items-center
                                                     px-3
@@ -165,168 +172,174 @@ export default function RequisitionTable({
                                                     bg-green-100
                                                     text-green-700
                                                 "
-                                            >
-                                                Completed
-                                            </span>
-                                        </div>
+                                                    >
+                                                        Completed
+                                                    </span>
+                                                </div>
 
-                                        {progress.overdue_days > 0 ? (
+                                                {progress.overdue_days > 0 ? (
 
-                                            <p
-                                                className="
+                                                    <p
+                                                        className="
                                                     text-xs
                                                     text-red-500
                                                     font-medium
                                                 "
-                                            >
-                                                +{progress.overdue_days} overdue
-                                            </p>
+                                                    >
+                                                        +{progress.overdue_days} overdue
+                                                    </p>
 
-                                        ) : (
+                                                ) : (
 
-                                            <p
-                                                className="
+                                                    <p
+                                                        className="
                                                     text-xs
                                                     text-green-600
                                                     font-medium
                                                 "
-                                            >
-                                                On Time
-                                            </p>
+                                                    >
+                                                        On Time
+                                                    </p>
 
-                                        )}
+                                                )}
 
-                                    </div>
-                                );
-                            }
+                                            </div>
+                                        );
+                                    }
 
-                            /* ====================================
-                               ACTIVE
-                            ==================================== */
-                            const percent = Math.min(
-                                (progress.days_passed /
-                                    progress.grace) * 100,
-                                100
-                            );
+                                    /* ====================================
+                                       ACTIVE
+                                    ==================================== */
+                                    const percent = Math.min(
+                                        (progress.days_passed /
+                                            progress.grace) * 100,
+                                        100
+                                    );
 
-                            let color = "bg-green-500";
+                                    let color = "bg-green-500";
 
-                            if (
-                                progress.status === "warning"
-                            ) {
-                                color = "bg-yellow-500";
-                            }
+                                    if (
+                                        progress.status === "warning"
+                                    ) {
+                                        color = "bg-yellow-500";
+                                    }
 
-                            if (
-                                progress.status === "overdue"
-                            ) {
-                                color = "bg-red-500";
-                            }
+                                    if (
+                                        progress.status === "overdue"
+                                    ) {
+                                        color = "bg-red-500";
+                                    }
 
-                            return (
-                                <div className="space-y-1">
+                                    return (
+                                        <div className="space-y-1">
 
-                                    {/* BAR */}
-                                    <div
-                                        className="
+                                            {/* BAR */}
+                                            <div
+                                                className="
                                             w-full
                                             bg-gray-200
                                             rounded-full
                                             h-2
                                             overflow-hidden
                                         "
-                                    >
-                                        <div
-                                            className={`
+                                            >
+                                                <div
+                                                    className={`
                                                 h-2
                                                 rounded-full
                                                 transition-all
                                                 duration-500
                                                 ${color}
                                             `}
-                                            style={{
-                                                width: `${percent}%`,
-                                            }}
-                                        />
-                                    </div>
+                                                    style={{
+                                                        width: `${percent}%`,
+                                                    }}
+                                                />
+                                            </div>
 
-                                    {/* STATUS TEXT */}
-                                    <div
-                                        className="
+                                            {/* STATUS TEXT */}
+                                            <div
+                                                className="
                                             text-xs
                                             text-gray-500
                                             flex
                                             justify-between
                                         "
-                                    >
+                                            >
 
-                                        <span>
-                                            {progress.days_passed}/
-                                            {progress.grace}
-                                        </span>
+                                                <span>
+                                                    {progress.days_passed}/
+                                                    {progress.grace}
+                                                </span>
 
-                                        {progress.overdue_days > 0 && (
-                                            <span
-                                                className="
+                                                {progress.overdue_days > 0 && (
+                                                    <span
+                                                        className="
                                                     text-red-500
                                                     font-medium
                                                 "
-                                            >
-                                                +{progress.overdue_days} overdue
-                                            </span>
-                                        )}
+                                                    >
+                                                        +{progress.overdue_days} overdue
+                                                    </span>
+                                                )}
 
-                                    </div>
+                                            </div>
 
-                                    {/* OVERDUE START */}
-                                    <div
-                                        className="
+                                            {/* OVERDUE START */}
+                                            <div
+                                                className="
                                             text-[11px]
                                             text-gray-400
                                         "
-                                    >
-                                        Overdue starts:{" "}
+                                            >
+                                                Overdue starts:{" "}
 
-                                        {progress.overdue_start
-                                            ? new Date(
-                                                progress.overdue_start
-                                            ).toLocaleDateString()
-                                            : "—"}
-                                    </div>
+                                                {progress.overdue_start
+                                                    ? new Date(
+                                                        progress.overdue_start
+                                                    ).toLocaleDateString()
+                                                    : "—"}
+                                            </div>
 
-                                </div>
-                            );
-                        })()}
+                                        </div>
+                                    );
+                                })()}
 
-                    </td>
+                            </td>
 
-                    {/* STATUS */}
-                    <td className="px-4 py-3">
+                            {/* STATUS */}
+                            <td className="px-4 py-3">
 
-                        <StatusBadge
-                            status={item.Status}
-                        />
+                                <StatusBadge
+                                    status={item.Status}
+                                />
 
-                    </td>
+                            </td>
 
-                    {/* ACTION */}
-                    <td className="px-4 py-3">
+                            {/* ACTION */}
+                            <td className="px-4 py-3">
 
-                        <button
-                            onClick={() => onView(item)}
-                            className="
+                                <button
+                                    onClick={() => onView(item)}
+                                    className="
                                 text-gray-500
                                 hover:text-indigo-600
                                 transition-colors
                             "
-                        >
-                            <Eye className="w-4 h-4" />
-                        </button>
+                                >
+                                    <Eye className="w-4 h-4" />
+                                </button>
 
-                    </td>
+                            </td>
 
-                </tr>
-            )}
-        />
+
+                        </tr>
+                    );
+
+                }}
+
+            />
+
+        </div>
     );
 }

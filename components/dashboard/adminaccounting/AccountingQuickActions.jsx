@@ -21,7 +21,7 @@ const actions = [
         title: "Review Requisitions",
         description:
             "View and approve pending requisition requests.",
-        href: "/adminaccounting/requisitions",
+        href: "/dashboard/adminaccounting/finance-requisition",
         icon: ReceiptText,
         color: "text-blue-600",
         bg: "bg-blue-100",
@@ -32,7 +32,7 @@ const actions = [
         title: "Review Liquidations",
         description:
             "Monitor liquidation submissions and validations.",
-        href: "/adminaccounting/liquidations",
+        href: "/dashboard/adminaccounting/finance-liquidation",
         icon: WalletCards,
         color: "text-emerald-600",
         bg: "bg-emerald-100",
@@ -43,7 +43,7 @@ const actions = [
         title: "Export Reports",
         description:
             "Generate accounting and financial reports.",
-        href: "/adminaccounting/reports",
+        href: "/dashboard/adminaccounting/finance-requisition",
         icon: FileSpreadsheet,
         color: "text-amber-600",
         bg: "bg-amber-100",
@@ -51,10 +51,10 @@ const actions = [
     },
 
     {
-        title: "Overdue Monitoring",
+        title: "Analytical Reports",
         description:
-            "Track overdue liquidation submissions.",
-        href: "/adminaccounting/overdue",
+            "Monitor analytical report, monthly and yearly trend.",
+        href: "/dashboard/adminaccounting/finance-report",
         icon: Clock3,
         color: "text-red-600",
         bg: "bg-red-100",

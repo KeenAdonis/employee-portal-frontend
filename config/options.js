@@ -106,3 +106,42 @@ export const fuelTypeOptions = [
     { value: "Premium", label: "Premium" },
     { value: "Regular", label: "Regular" },
 ];
+
+export const requisitionTypeOptions = [
+    { value: "all", label: "All Types" },
+    { value: "Cash Advance", label: "Cash Advance" },
+    { value: "Request for Payment", label: "Request for Payment" },
+    { value: "Petty Cash", label: "Petty Cash" },
+    { value: "Reimbursement", label: "Reimbursement" },
+];
+
+export const requisitionStatusOptions = [
+    { value: "all", label: "All Status" },
+    { value: "Pending", label: "Pending" },
+    { value: "Checked", label: "Checked" },
+    { value: "Approved", label: "Approved" },
+    { value: "Rejected", label: "Rejected" },
+];
+
+export const liquidationStatusOptions = [
+    { value: "all", label: "All Status" },
+    { value: "Pending", label: "Pending" },
+    { value: "Checked", label: "Checked" },
+    { value: "Approved", label: "Approved" },
+    { value: "Rejected", label: "Rejected" },
+];
+
+export const overtimeStatusOptions = [
+    { value: "all", label: "All Status" },
+    { value: "Pending", label: "Pending" },
+    { value: "Pre-Approved", label: "Pre-Approved" },
+    { value: "Approved", label: "Approved" },
+    { value: "Rejected", label: "Rejected" },
+];
+
+export const leaveStatusOptions = [
+    { value: "all", label: "All Status" },
+    { value: "Pending", label: "Pending" },
+    { value: "Approved", label: "Approved" },
+    { value: "Rejected", label: "Rejected" },
+];

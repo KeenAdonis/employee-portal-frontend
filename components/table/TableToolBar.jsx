@@ -1,9 +1,11 @@
 "use client";
 
 import { Search } from "lucide-react";
+import Input from "@/components/ui/Input";
 
 export default function TableToolBar({
     title,
+    search,
     onSearch,
     onCreate,
     searchPlaceholder = "Search...",
@@ -27,15 +29,16 @@ export default function TableToolBar({
                 {/* SEARCH */}
                 {onSearch && (
                     <div className="relative w-full md:w-[250px]">
-                        <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
-                        <input
-                            type="text"
+                        <Search className="absolute left-3 top-3.5 w-4 h-4 text-gray-400" />
+                        <Input
+                            value={search}
                             placeholder={searchPlaceholder}
-                            onChange={(e) => onSearch(e.target.value)}
+                            onChange={(e) =>
+                                onSearch(e.target.value)
+                            }
                             className="
-                                w-full pl-9 pr-3 py-2 text-sm
-                                border rounded-lg
-                                focus:outline-none focus:ring-2 focus:ring-indigo-500
+                                pl-9
+                                h-11
                             "
                         />
                     </div>

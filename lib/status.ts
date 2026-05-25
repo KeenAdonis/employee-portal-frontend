@@ -9,6 +9,22 @@ export const STATUS = {
     PROCESSING: "Processing",
 } as const;
 
+// 🔹 EMPLOYEE STATUS
+export const EMPLOYEE_STATUS = {
+    ACTIVE: "ACTIVE",
+    INACTIVE: "INACTIVE",
+} as const;
+
+// 🔹 EMPLOYMENT STATUS
+export const EMPLOYMENT_STATUS = {
+    REGULAR: "Regular",
+    PROBATIONARY: "Probationary",
+    PART_TIME: "Part-Time",
+    ON_CALL: "On Call",
+    PROJECT_BASED: "Project-Based",
+    CONTRACTUAL: "Contractual",
+} as const;
+
 // 🔹 APPROVAL-BASED MODULES (Leave, Overtime, Requisition)
 export const APPROVAL_STATUS = {
     CHECKED: "Checked",
@@ -16,6 +32,7 @@ export const APPROVAL_STATUS = {
     PRE_APPROVED: "Pre-Approved",
     APPROVED: "Approved",
     REJECTED: "Rejected",
+    CANCELLED: "Cancelled",
     LIQUIDATED: "Liquidated",
 } as const;
 
@@ -32,7 +49,6 @@ export const DOCUMENT_STATUS = {
     QUEUED: "Queued",
     SENT: "Sent",
     FAILED: "Failed",
-
 
     SEND: "Send",
     RESEND: "Resend",
@@ -56,6 +72,8 @@ export const LOAN_STATUS = {
 // 🔹 TYPE
 export type StatusType =
     | typeof STATUS[keyof typeof STATUS]
+    | typeof EMPLOYEE_STATUS[keyof typeof EMPLOYEE_STATUS]
+    | typeof EMPLOYMENT_STATUS[keyof typeof EMPLOYMENT_STATUS]
     | typeof APPROVAL_STATUS[keyof typeof APPROVAL_STATUS]
     | typeof ACCOMPLISHMENT_STATUS[keyof typeof ACCOMPLISHMENT_STATUS]
     | typeof DOCUMENT_STATUS[keyof typeof DOCUMENT_STATUS]
@@ -107,10 +125,70 @@ export const getStatusMeta = (status?: StatusType | string): StatusMeta => {
                 className: "bg-red-100 text-red-700 border border-red-200",
             };
 
+        case APPROVAL_STATUS.CANCELLED:
+            return {
+                label: "Cancelled",
+                className: "bg-red-100 text-red-700 border border-red-200",
+            };
+
         case APPROVAL_STATUS.LIQUIDATED:
             return {
                 label: "Liquidated",
                 className: "bg-cyan-100 text-cyan-700 border border-cyan-200",
+            };
+
+        /* =========================
+           EMPLOYEE
+        ========================= */
+        case EMPLOYEE_STATUS.ACTIVE:
+            return {
+                label: "Active",
+                className: "bg-green-100 text-green-700 border border-green-200",
+            };
+
+        case EMPLOYEE_STATUS.INACTIVE:
+            return {
+                label: "Inactive",
+                className: "bg-red-100 text-red-700 border border-red-200",
+            };
+
+        /* =========================
+           EMPLOYMENT
+        ========================= */
+        case EMPLOYMENT_STATUS.REGULAR:
+            return {
+                label: "Regular",
+                className: "bg-blue-100 text-blue-700 border border-blue-200",
+            };
+
+        case EMPLOYMENT_STATUS.PROBATIONARY:
+            return {
+                label: "Probationary",
+                className: "bg-yellow-100 text-yellow-700 border border-yellow-200",
+            };
+
+        case EMPLOYMENT_STATUS.PART_TIME:
+            return {
+                label: "Part-Time",
+                className: "bg-blue-100 text-blue-700 border border-blue-200",
+            };
+
+        case EMPLOYMENT_STATUS.ON_CALL:
+            return {
+                label: "On Call",
+                className: "bg-purple-100 text-purple-700 border border-purple-200",
+            };
+
+        case EMPLOYMENT_STATUS.PROJECT_BASED:
+            return {
+                label: "Project-Based",
+                className: "bg-cyan-100 text-cyan-700 border border-cyan-200",
+            };
+
+        case EMPLOYMENT_STATUS.CONTRACTUAL:
+            return {
+                label: "Contractual",
+                className: "bg-orange-100 text-orange-700 border border-orange-200",
             };
 
         /* =========================

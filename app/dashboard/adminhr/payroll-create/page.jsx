@@ -112,7 +112,7 @@ export default function PayrollCreatePage() {
         form.MonthlySalary !== null;
 
     const steps = [
-        { id: 1, label: "Info", icon: User },
+        { id: 1, label: "Information", icon: User },
         { id: 2, label: "Overtime", icon: Clock },
         { id: 3, label: "Per Day", icon: Calendar },
         { id: 4, label: "Deductions", icon: MinusCircle },
@@ -313,76 +313,113 @@ export default function PayrollCreatePage() {
     return (
         <div className="p-6 space-y-6">
 
-            {/* HEADER */}
-            <div>
-                <h1 className="text-xl font-semibold text-gray-900">
-                    Create Payroll
-                </h1>
-                <p className="text-sm text-gray-500">
-                    Compute and generate employee payroll
-                </p>
-            </div>
+            {/* STEPPER */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
 
-            <div className="flex items-center justify-between mb-6">
-
-                {steps.map((s, index) => {
+                {steps.map((s) => {
                     const Icon = s.icon;
-
+                
                     const isActive = step === s.id;
                     const isCompleted = step > s.id;
-
+                
                     return (
-                        <div
+                        <button
                             key={s.id}
-                            className="flex-1 flex items-center cursor-pointer"
+                            type="button"
                             onClick={() => handleStepClick(s.id)}
+                            className={`
+                                relative
+                                group
+                                rounded-2xl
+                                border
+                                p-4
+                                transition-all duration-200
+                                text-left
+                                hover:shadow-md
+                                hover:-translate-y-0.5
+                            
+                                ${isCompleted
+                                    ? "border-emerald-200 bg-emerald-50 shadow-sm"
+                                    : isActive
+                                        ? "border-indigo-400 bg-indigo-50 shadow-md ring-1 ring-indigo-200"
+                                        : "border-gray-200 bg-white hover:border-gray-300"
+                                }
+                            `}
                         >
-
-                            {/* STEP */}
-                            <div
-                                className={`
-                                        relative
-                                        w-10 h-10 rounded-full flex items-center justify-center
-                                        transition-all
+                        
+                            {/* TOP */}
+                            <div className="flex items-center justify-between mb-4">
+                            
+                                <div
+                                    className={`
+                                        w-11 h-11 rounded-xl
+                                        flex items-center justify-center
+                                        transition-all duration-200
+                                    
                                         ${isCompleted
-                                        ? "bg-indigo-600 text-white"
-                                        : isActive
-                                            ? "bg-indigo-100 text-indigo-600 border border-indigo-300"
-                                            : "bg-gray-100 text-gray-400"
-                                    }
-                                        `}
-                            >
-                                {/* ✅ COMPLETED → CHECK ICON */}
-                                {isCompleted ? (
-                                    <Check className="w-5 h-5" />
-                                ) : (
+                                            ? "bg-emerald-600 text-white"
+                                            : isActive
+                                                ? "bg-indigo-600 text-white shadow-sm"
+                                                : "bg-gray-100 text-gray-400"
+                                        }
+                                    `}
+                                >
                                     <Icon className="w-5 h-5" />
-                                )}
 
-                                {/* 🔴 ERROR DOT */}
+                                </div>
+
+                                {/* COMPLETED CHECK BADGE */}
+                                {isCompleted && (
+                                    <div className="
+                                        absolute
+                                        top-3
+                                        right-3
+                                        w-5
+                                        h-5
+                                        rounded-full
+                                        bg-emerald-500
+                                        flex
+                                        items-center
+                                        justify-center
+                                        shadow-sm
+                                    ">
+                                        <Check className="w-3 h-3 text-white" />
+                                    </div>
+                                )}
+                                
+                                {/* ERROR DOT */}
                                 {getStepError(s.id) && (
-                                    <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border border-white" />
+                                    <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
                                 )}
                             </div>
+                            
+                            {/* LABELS */}
+                            <div>
+                                <p
+                                    className={`
+                                        text-sm font-semibold
+                                        ${isActive || isCompleted
+                                            ? "text-gray-900"
+                                            : "text-gray-600"
+                                        }
+                                    `}
+                                >
+                                    {s.label}
+                                </p>
+                                    
+                                <p className="text-xs text-gray-400 mt-1">
+                                    {s.id === 1 && "Employee details"}
+                                    {s.id === 2 && "Overtime entries"}
+                                    {s.id === 3 && "Special pay days"}
+                                    {s.id === 4 && "Salary deductions"}
+                                    {s.id === 5 && "Additional benefits"}
+                                    {s.id === 6 && "Loan repayments"}
+                                </p>
+                            </div>
 
-                            {/* LINE */}
-                            {index < steps.length - 1 && (
-                                <div className="flex-1 h-[2px] mx-2 bg-gray-200 relative">
-                                    <div
-                                        className={`
-                                absolute top-0 left-0 h-full transition-all
-                                ${step > s.id
-                                                ? "bg-indigo-600 w-full"
-                                                : "w-0"
-                                            }
-                            `}
-                                    />
-                                </div>
-                            )}
-                        </div>
+                        </button>
                     );
                 })}
-
             </div>
 
             {step === 1 && (

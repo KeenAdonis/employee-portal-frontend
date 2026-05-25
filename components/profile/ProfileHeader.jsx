@@ -1,64 +1,103 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+
+import Image from "next/image";
+
+import { formatDate } from "@/lib/format";
 
 import ProfileAvatarModal from "@/components/profile/ProfileAvatarModal";
 
 import {
-    Building2,
-    Briefcase,
     Mail,
     Phone,
-    BadgeCheck,
+    Building2,
     Pencil,
+    CalendarDays,
+    VenusAndMars,
+    Heart,
+    User,
 } from "lucide-react";
 
 export default function ProfileHeader({ profile }) {
 
     const [openAvatarModal, setOpenAvatarModal] = useState(false);
 
-    const initials = `${profile?.FirstName?.charAt(0) || ""}${profile?.LastName?.charAt(0) || ""}`;
+    const initials = useMemo(() => {
+        return `${profile?.FirstName?.charAt(0) || ""}${profile?.LastName?.charAt(0) || ""}`;
+    }, [profile]);
+
+    const infoItems = [
+        {
+            label: "Department",
+            icon: Building2,
+            value: profile?.Department || "No Department",
+        },
+        {
+            label: "Birthday",
+            icon: CalendarDays,
+            value: formatDate(profile?.Birthday),
+        },
+        {
+            label: "Gender",
+            icon: VenusAndMars,
+            value: profile?.Gender || "—",
+        },
+        {
+            label: "Civil Status",
+            icon: Heart,
+            value: profile?.CivilStatus || "—",
+        },
+    ];
 
     return (
         <>
             <div
                 className="
+                    relative
                     overflow-hidden
-                    rounded-[32px]
-                    border
-                    border-slate-200
-                    bg-white
+                    rounded-[34px]
                     shadow-sm
-                    transition-all
-                    duration-300
-                    hover:shadow-md
                 "
             >
 
-                {/* COVER */}
+                {/* HEADER */}
                 <div
                     className="
                         relative
-                        h-44
                         overflow-hidden
+                        rounded-[34px]
                         bg-gradient-to-r
                         from-slate-950
-                        via-slate-900
+                        via-blue-950
                         to-indigo-950
                     "
                 >
 
-                    {/* ENTERPRISE GLOW */}
+                    {/* LIGHT GLOW */}
                     <div
                         className="
                             absolute
                             inset-0
-                            opacity-30
-                            bg-[radial-gradient(circle_at_top_right,_rgba(99,102,241,0.35),_transparent_35%)]
+                            bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.20),_transparent_35%)]
                         "
                     />
 
-                    {/* GRID PATTERN */}
+                    {/* RIGHT GLOW */}
+                    <div
+                        className="
+                            absolute
+                            bottom-0
+                            right-0
+                            h-80
+                            w-80
+                            rounded-full
+                            bg-indigo-500/20
+                            blur-3xl
+                        "
+                    />
+
+                    {/* GRID */}
                     <div
                         className="
                             absolute
@@ -68,42 +107,57 @@ export default function ProfileHeader({ profile }) {
                         "
                     />
 
-                    {/* OPTIONAL SOFT BOTTOM FADE */}
+                    {/* CURVES */}
                     <div
                         className="
                             absolute
-                            inset-x-0
-                            bottom-0
-                            h-20
-                            bg-gradient-to-t
-                            from-black/20
-                            to-transparent
+                            -bottom-24
+                            -left-16
+                            h-80
+                            w-80
+                            rounded-full
+                            border
+                            border-blue-400/10
                         "
                     />
 
-                </div>
-
-                {/* CONTENT */}
-                <div
-                    className="
-                        relative
-                        border-t
-                        border-slate-100
-                        px-6
-                        pt-6
-                        pb-6
-                    "
-                >
+                    <div
+                        className="
+                            absolute
+                            -bottom-40
+                            -left-28
+                            h-[500px]
+                            w-[500px]
+                            rounded-full
+                            border
+                            border-blue-400/10
+                        "
+                    />
 
                     <div
                         className="
+                            absolute
+                            -right-24
+                            top-0
+                            h-[420px]
+                            w-[420px]
+                            rounded-full
+                            border
+                            border-indigo-300/10
+                        "
+                    />
+
+                    {/* CONTENT */}
+                    <div
+                        className="
                             relative
-                            -mt-24
                             flex
                             flex-col
-                            gap-6
+                            gap-10
+                            px-8
+                            py-8
                             xl:flex-row
-                            xl:items-end
+                            xl:items-center
                             xl:justify-between
                         "
                     >
@@ -113,51 +167,64 @@ export default function ProfileHeader({ profile }) {
                             className="
                                 flex
                                 flex-col
-                                gap-5
-                                sm:flex-row
-                                sm:items-end
+                                gap-8
+                                lg:flex-row
+                                lg:items-center
                             "
                         >
 
-                            {/* AVATAR */}
-                            <div className="relative">
+                            {/* PROFILE IMAGE */}
+                            <div className="relative shrink-0">
 
                                 <div
                                     className="
-                                        flex
+                                        relative
                                         h-32
                                         w-32
-                                        items-center
-                                        justify-center
                                         overflow-hidden
-                                        rounded-[28px]
-                                        border-4
+                                        rounded-full
+                                        border-[5px]
                                         border-white
-                                        bg-slate-900
-                                        text-5xl
-                                        font-bold
-                                        text-white
+                                        bg-white
                                         shadow-2xl
                                     "
                                 >
 
                                     {profile?.ProfileImage ? (
 
-                                        <img
+                                        <Image
                                             src={`${process.env.NEXT_PUBLIC_STORAGE_URL}/storage/${profile.ProfileImage}`}
                                             alt="Profile"
-                                            className="h-full w-full object-cover"
+                                            fill
+                                            priority
+                                            className="object-cover"
                                         />
 
                                     ) : (
 
-                                        initials
+                                        <div
+                                            className="
+                                                flex
+                                                h-full
+                                                w-full
+                                                items-center
+                                                justify-center
+                                                bg-slate-900
+                                                text-4xl
+                                                font-bold
+                                                text-white
+                                            "
+                                        >
+
+                                            {initials}
+
+                                        </div>
 
                                     )}
 
                                 </div>
 
-                                {/* EDIT AVATAR BUTTON */}
+                                {/* CHANGE PROFILE IMAGE */}
                                 <button
                                     onClick={() => setOpenAvatarModal(true)}
                                     className="
@@ -165,202 +232,262 @@ export default function ProfileHeader({ profile }) {
                                         bottom-1
                                         right-1
                                         flex
-                                        h-8
-                                        w-8
+                                        h-10
+                                        w-10
                                         items-center
                                         justify-center
-                                        rounded-2xl
+                                        rounded-full
                                         border-4
                                         border-white
-                                        bg-amber-500
-                                        text-amber-900
+                                        bg-white
+                                        text-slate-700
                                         shadow-xl
                                         transition-all
-                                        duration-300
+                                        duration-200
                                         hover:scale-105
-                                        hover:bg-amber-600
+                                        hover:bg-slate-100
                                     "
                                 >
-                                    <Pencil size={14} />
+
+                                    <Pencil size={16} />
+
                                 </button>
 
                             </div>
 
-                            {/* EMPLOYEE DETAILS */}
-                            <div className="pb-2">
+                            {/* DETAILS */}
+                            <div className="text-white">
 
-                                {/* NAME + STATUS */}
-                                <div className="flex flex-wrap items-center gap-3">
-
-                                    <h1
-                                        className="
-                                            -mt-1
-                                            text-[52px]
-                                            font-bold
-                                            tracking-tight
-                                            bg-gradient-to-r
-                                            from-amber-400
-                                            via-yellow-700
-                                            to-amber-300
-                                            bg-clip-text
-                                            text-transparent
-                                            drop-shadow-[0_2px_10px_rgba(212,175,55,0.25)]
-                                        "
-                                    >
-
-                                        {profile?.FirstName} {profile?.LastName}
-
-                                    </h1>
-
-                                    <span
-                                        className="
-                                            inline-flex
-                                            items-center
-                                            gap-1
-                                            rounded-full
-                                            bg-green-200
-                                            px-4
-                                            py-1.5
-                                            text-xs
-                                            font-bold
-                                            uppercase
-                                            tracking-wide
-                                            text-green-700
-                                        "
-                                    >
-
-                                        <BadgeCheck size={14} />
-
-                                        {profile?.Status || "ACTIVE"}
-
-                                    </span>
-
-                                </div>
-
-                                {/* EMPLOYEE NUMBER */}
-                                <p
+                                {/* NAME */}
+                                <h1
                                     className="
-                                        mt-2
-                                        text-sm
-                                        font-medium
-                                        text-slate-500
+                                        text-3xl
+                                        font-bold
+                                        tracking-tight
+                                        xl:text-4xl
                                     "
                                 >
 
-                                    Employee No: {profile?.EmployeeNo || "—"}
+                                    {profile?.FirstName} {profile?.LastName}
 
-                                </p>
+                                </h1>
 
-                                {/* INFO ROW */}
-                                <div
-                                    className="
-                                        mt-5
-                                        flex
-                                        flex-wrap
-                                        gap-x-6
-                                        gap-y-3
-                                        text-sm
-                                        text-slate-600
-                                    "
-                                >
+                                {/* INFO */}
+                                <div className="mt-5 space-y-3">
 
-                                    <div className="flex items-center gap-2">
+                                    {/* EMPLOYEE NUMBER */}
+                                    <div className="flex items-center gap-3">
 
-                                        <Briefcase
-                                            size={16}
-                                            className="text-amber-500"
-                                        />
+                                        <div
+                                            className="
+                                                flex
+                                                h-9
+                                                w-9
+                                                items-center
+                                                justify-center
+                                                rounded-xl
+                                                bg-white/10
+                                                text-white
+                                            "
+                                        >
 
-                                        <span className="font-medium">
-                                            {profile?.Position || "No Position"}
-                                        </span>
+                                            <User size={16} />
 
-                                    </div>
+                                        </div>
 
-                                    <div className="flex items-center gap-2">
+                                        <p
+                                            className="
+                                                text-sm
+                                                font-medium
+                                                text-white/80
+                                            "
+                                        >
 
-                                        <Building2
-                                            size={16}
-                                            className="text-amber-500"
-                                        />
+                                            Employee No: {profile?.EmployeeNo || "—"}
 
-                                        <span className="font-medium">
-                                            {profile?.Department || "No Department"}
-                                        </span>
+                                        </p>
 
                                     </div>
 
-                                    <div className="flex items-center gap-2">
+                                    {/* CONTACT */}
+                                    <div className="flex items-center gap-3">
 
-                                        <Mail
-                                            size={16}
-                                            className="text-amber-500"
-                                        />
+                                        <div
+                                            className="
+                                                flex
+                                                h-9
+                                                w-9
+                                                items-center
+                                                justify-center
+                                                rounded-xl
+                                                bg-white/10
+                                                text-white
+                                            "
+                                        >
 
-                                        <span className="font-medium">
-                                            {profile?.EmailAddress || "No Email"}
-                                        </span>
+                                            <Phone size={16} />
 
-                                    </div>
+                                        </div>
 
-                                    <div className="flex items-center gap-2">
+                                        <p
+                                            className="
+                                                text-sm
+                                                font-medium
+                                                text-white/80
+                                            "
+                                        >
 
-                                        <Phone
-                                            size={16}
-                                            className="text-amber-500"
-                                        />
-
-                                        <span className="font-medium">
                                             {profile?.ContactNumber || "No Contact"}
-                                        </span>
+
+                                        </p>
+
+                                    </div>
+
+                                    {/* EMAIL */}
+                                    <div className="flex items-center gap-3">
+
+                                        <div
+                                            className="
+                                                flex
+                                                h-9
+                                                w-9
+                                                items-center
+                                                justify-center
+                                                rounded-xl
+                                                bg-white/10
+                                                text-white
+                                            "
+                                        >
+
+                                            <Mail size={16} />
+
+                                        </div>
+
+                                        <p
+                                            className="
+                                                text-sm
+                                                font-medium
+                                                text-white/80
+                                                break-all
+                                            "
+                                        >
+
+                                            {profile?.EmailAddress || "No Email"}
+
+                                        </p>
 
                                     </div>
 
                                 </div>
+
                             </div>
+
                         </div>
 
                         {/* RIGHT SIDE */}
-                        <div className="flex items-center gap-3">
+                        <div
+                            className="
+                                grid
+                                grid-cols-1
+                                gap-4
+                                sm:grid-cols-2
+                                xl:w-[480px]
+                            "
+                        >
 
-                            <button
-                                className="
-                                    inline-flex
-                                    items-center
-                                    gap-2
-                                    rounded-2xl
-                                    bg-slate-900
-                                    px-6
-                                    py-3.5
-                                    text-sm
-                                    font-semibold
-                                    text-white
-                                    shadow-lg
-                                    transition-all
-                                    duration-300
-                                    hover:bg-slate-800
-                                    hover:shadow-xl
-                                "
-                            >
+                            {infoItems.map((item, index) => {
 
-                                <Pencil size={16} />
+                                const Icon = item.icon;
 
-                                Edit Profile
+                                return (
+                                    <div
+                                        key={index}
+                                        className="
+                                            flex
+                                            items-center
+                                            gap-4
+                                            rounded-2xl
+                                            border
+                                            border-white/10
+                                            bg-white/5
+                                            px-4
+                                            py-4
+                                            backdrop-blur-md
+                                        "
+                                    >
 
-                            </button>
+                                        {/* ICON */}
+                                        <div
+                                            className="
+                                                flex
+                                                h-11
+                                                w-11
+                                                shrink-0
+                                                items-center
+                                                justify-center
+                                                rounded-xl
+                                                bg-white/10
+                                                text-white
+                                            "
+                                        >
+
+                                            <Icon size={18} />
+
+                                        </div>
+
+                                        {/* CONTENT */}
+                                        <div className="min-w-0">
+
+                                            <p
+                                                className="
+                                                    text-xs
+                                                    font-medium
+                                                    uppercase
+                                                    tracking-wide
+                                                    text-white/50
+                                                "
+                                            >
+
+                                                {item.label}
+
+                                            </p>
+
+                                            <p
+                                                className="
+                                                    truncate
+                                                    text-sm
+                                                    font-semibold
+                                                    text-white
+                                                "
+                                            >
+
+                                                {item.value}
+
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+                                );
+
+                            })}
 
                         </div>
+
                     </div>
+
                 </div>
+
             </div>
 
-            {/* AVATAR MODAL */}
+            {/* PROFILE IMAGE MODAL */}
             <ProfileAvatarModal
                 open={openAvatarModal}
                 onClose={() => setOpenAvatarModal(false)}
                 profile={profile}
                 onSuccess={() => window.location.reload()}
             />
+
         </>
     );
 }

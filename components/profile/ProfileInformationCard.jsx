@@ -12,14 +12,10 @@ import {
 export default function ProfileInformationCard({ profile }) {
 
     const fields = [
-        {
-            label: "Birthday",
-            value: formatDate(profile?.Birthday),
-            icon: CalendarDays,
-        },
+
         {
             label: "Gender",
-            value: profile?.Gender,
+            value: profile?.SSSNumber,
             icon: VenusAndMars,
         },
         {
@@ -48,7 +44,7 @@ export default function ProfileInformationCard({ profile }) {
             <div className="mb-6">
 
                 <h2 className="text-xl font-semibold text-gray-900">
-                    Profile Information
+                    Goverment ID
                 </h2>
 
                 <p className="mt-1 text-sm text-gray-500">

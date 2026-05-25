@@ -13,10 +13,16 @@ export default function CustomSelect({
   onChange,
   options,
   placeholder = "Select",
+  disabled = false,
 }) {
   return (
-    <Select value={value} onValueChange={onChange}>
-      
+
+    <Select
+      value={value}
+      onValueChange={onChange}
+      disabled={disabled}
+    >
+
       {/* TRIGGER */}
       <SelectTrigger
         className="
@@ -25,6 +31,9 @@ export default function CustomSelect({
           bg-white text-sm text-gray-700
           focus:ring-2 focus:ring-purple-300
           focus:border-purple-500
+
+          disabled:opacity-50
+          disabled:cursor-not-allowed
         "
       >
         <SelectValue placeholder={placeholder} />
@@ -32,7 +41,9 @@ export default function CustomSelect({
 
       {/* DROPDOWN */}
       <SelectContent className="rounded-xl shadow-lg border border-gray-200">
+
         {options.map((opt) => (
+
           <SelectItem
             key={opt.value}
             value={opt.value}
@@ -40,7 +51,9 @@ export default function CustomSelect({
           >
             {opt.label}
           </SelectItem>
+
         ))}
+
       </SelectContent>
 
     </Select>

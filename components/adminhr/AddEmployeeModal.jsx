@@ -41,6 +41,10 @@ const initialForm = {
     Position: "",
     JobLevel: "",
     MonthlySalary: "",
+    SSSNumber: "",
+    PhilHealthNumber: "",
+    PagIbigNumber: "",
+    TIN: "",
 };
 
 /* =========================
@@ -189,6 +193,10 @@ export default function AddEmployeeModal({ open, onClose, onSuccess }) {
                 Position: form.Position,
                 JobLevel: form.JobLevel,
                 MonthlySalary: form.MonthlySalary,
+                SSSNumber: form.SSSNumber,
+                PhilHealthNumber: form.PhilHealthNumber,
+                PagIbigNumber: form.PagIbigNumber,
+                TIN: form.TIN,
             });
 
             const data = res.data;
@@ -534,6 +542,62 @@ export default function AddEmployeeModal({ open, onClose, onSuccess }) {
                                 }
                             />
                         </FormField>
+                    </div>
+                </div>
+
+                {/* GOVERNMENT */}
+                <div>
+                    <h2 className="text-sm font-semibold text-gray-700 mb-3">
+                        Government ID's
+                    </h2>
+
+                    <div className="grid grid-cols-2 gap-4">
+
+                        <FormField
+                            label="SSS Number"
+                        >
+                            <Input
+                                value={form.SSSNumber}
+                                onChange={(e) =>
+                                    handleChange("SSSNumber", e.target.value)
+                                }
+                            />
+                        </FormField>
+
+                        <FormField
+                            label="PhilHealth Number"
+                        >
+                            <Input
+                                value={form.PhilHealthNumber}
+                                onChange={(e) =>
+                                    handleChange("PhilHealthNumber", e.target.value)
+                                }
+                            />
+                        </FormField>
+
+                        <FormField
+                            label="Pag-IBIG Number"
+                        >
+                            <Input
+                                value={form.PagIbigNumber}
+                                onChange={(e) =>
+                                    handleChange("PagIbigNumber", e.target.value)
+                                }
+                            />
+                        </FormField>
+
+                        <FormField
+                            label="TIN"
+                        >
+                            <Input
+                                value={form.TIN}
+                                onChange={(e) =>
+                                    handleChange("TIN", e.target.value)
+                                }
+                            />
+                        </FormField>
+
+
                     </div>
                 </div>
             </div>

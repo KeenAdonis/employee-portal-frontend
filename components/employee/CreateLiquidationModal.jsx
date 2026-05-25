@@ -21,6 +21,7 @@ export default function CreateLiquidationModal({
     open,
     onClose,
     onSuccess,
+    editingLiquidation,
 }) {
 
     const { showToast } = useToast();
@@ -196,7 +197,7 @@ export default function CreateLiquidationModal({
        SUBMIT
     ========================= */
 
-    const handleSubmit = async () => {
+    const handleSubmit = async (isDraft = false) => {
 
         try {
 
@@ -211,6 +212,11 @@ export default function CreateLiquidationModal({
             formData.append("cash_advance", form.cash_advance);
 
             formData.append("remarks", form.remarks);
+
+            formData.append(
+                "is_draft",
+                isDraft ? 1 : 0
+            );
 
             form.particulars.forEach((p, i) => {
 
@@ -238,7 +244,9 @@ export default function CreateLiquidationModal({
 
             showToast({
                 title: "Success",
-                message: "Liquidation submitted successfully.",
+                message: isDraft
+                    ? "Liquidation saved as draft."
+                    : "Liquidation submitted successfully.",
                 type: "success",
             });
 
@@ -268,7 +276,72 @@ export default function CreateLiquidationModal({
 
         fetchAvailableRequisitions();
 
-    }, [open]);
+        // =========================
+        // EDIT MODE
+        // =========================
+
+        if (editingLiquidation) {
+
+            setForm({
+                requisition_id:
+                    editingLiquidation.request_id,
+
+                cash_advance:
+                    editingLiquidation.cash_advance,
+
+                remarks:
+                    editingLiquidation.remarks || "",
+
+                attachments: [],
+
+                particulars:
+                    editingLiquidation.particulars
+                        ?.length
+
+                        ? editingLiquidation.particulars.map((p) => ({
+                            particulars:
+                                p.particulars || "",
+
+                            or_no:
+                                p.or_no || "",
+
+                            amount:
+                                p.amount || "",
+                        }))
+
+                        : [
+                            {
+                                particulars: "",
+                                or_no: "",
+                                amount: "",
+                            },
+                        ],
+            });
+
+        }
+
+        // =========================
+        // CREATE MODE
+        // =========================
+
+        else {
+
+            setForm({
+                requisition_id: "",
+                cash_advance: 0,
+                remarks: "",
+                attachments: [],
+                particulars: [
+                    {
+                        particulars: "",
+                        or_no: "",
+                        amount: "",
+                    },
+                ],
+            });
+        }
+
+    }, [open, editingLiquidation]);
 
     const fetchAvailableRequisitions =
         async () => {
@@ -294,7 +367,11 @@ export default function CreateLiquidationModal({
         <Modal
             open={open}
             onClose={onClose}
-            title="Create Liquidation"
+            title={
+                editingLiquidation
+                    ? "Edit Draft Liquidation"
+                    : "Create Liquidation"
+            }
             subtitle="Submit your liquidation details and supporting documents."
             maxWidth="max-w-6xl"
 
@@ -337,12 +414,20 @@ export default function CreateLiquidationModal({
                         </Button>
 
                         <Button
-                            onClick={handleSubmit}
+                            variant="outline"
+                            onClick={() => handleSubmit(true)}
+                            disabled={loading}
+                        >
+                            Save as Draft
+                        </Button>
+
+                        <Button
+                            onClick={() => handleSubmit(false)}
                             disabled={loading}
                             className="bg-indigo-600 hover:bg-indigo-700 text-white"
                         >
                             {loading
-                                ? "Submitting..."
+                                ? "Processing..."
                                 : "Submit Liquidation"}
                         </Button>
 
@@ -376,6 +461,7 @@ export default function CreateLiquidationModal({
                             </label>
 
                             <CustomSelect
+                                disabled={!!editingLiquidation}
                                 placeholder="Select requisition"
                                 value={form.requisition_id}
                                 options={requisitionOptions}
@@ -403,6 +489,7 @@ export default function CreateLiquidationModal({
                             </label>
 
                             <Input
+                                disabled
                                 type="number"
                                 value={
                                     form.cash_advance

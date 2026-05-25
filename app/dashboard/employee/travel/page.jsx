@@ -7,6 +7,7 @@ import TravelRequestTable from "@/components/travel/TravelRequestTable";
 import CreateTravelModal from "@/components/employee/CreateTravelModal";
 
 import Drawer from "@/components/ui/Drawer";
+import Modal from "@/components/ui/Modal";
 import Pagination from "@/components/table/Pagination";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Tabs from "@/components/ui/Tabs";
@@ -30,9 +31,12 @@ export default function Page() {
     const [selected, setSelected] = useState(null);
     const [openDrawer, setOpenDrawer] = useState(false);
     const [createOpen, setCreateOpen] = useState(false);
+    const [cancelOpen, setCancelOpen] = useState(false);
+    const [cancelReason, setCancelReason] = useState("");
+    const [selectedTravel, setSelectedTravel] = useState(null);
+    const [actionLoading, setActionLoading] = useState(false);
     const [meta, setMeta] = useState(null);
     const [page, setPage] = useState(1);
-    const [tab, setTab] = useState("requests");
     const { showToast } = useToast();
 
     /*
@@ -48,13 +52,8 @@ export default function Page() {
 
             setLoading(true);
 
-            let statusFilter =
-                tab === "requests"
-                    ? "Pending"
-                    : "Approved,Rejected,Liquidated";
-
             const res = await api.get(
-                `/travel/requests?page=${pageNumber}&status=${statusFilter}`
+                `/travel/requests?page=${pageNumber}`
             );
 
             setData(
@@ -94,6 +93,95 @@ export default function Page() {
         setOpenDrawer(true);
     };
 
+    const handleOpenCancel = (item) => {
+
+        setSelectedTravel(item);
+
+        setCancelOpen(true);
+    };
+
+    const handleComplete = async (id) => {
+
+        try {
+
+            setActionLoading(true);
+
+            await api.patch(
+                `/travel/requests/${id}/complete`
+            );
+
+            showToast({
+                title: "Success",
+                message:
+                    "Travel marked as completed.",
+                type: "success",
+            });
+
+            fetchTravelRequests(page);
+
+        } catch (err) {
+
+            showToast({
+                title: "Error",
+                message:
+                    err?.response?.data?.message
+                    ||
+                    "Failed to complete travel.",
+                type: "error",
+            });
+
+        } finally {
+
+            setActionLoading(false);
+        }
+    };
+
+    const handleCancel = async () => {
+
+        try {
+
+            setActionLoading(true);
+
+            await api.patch(
+                `/travel/requests/${selectedTravel.id}/cancel`,
+                {
+                    cancellation_reason:
+                        cancelReason,
+                }
+            );
+
+            showToast({
+                title: "Success",
+                message:
+                    "Travel request cancelled.",
+                type: "success",
+            });
+
+            fetchTravelRequests(page);
+
+            setCancelOpen(false);
+
+            setCancelReason("");
+
+            setSelectedTravel(null);
+
+        } catch (err) {
+
+            showToast({
+                title: "Error",
+                message:
+                    err?.response?.data?.message
+                    ||
+                    "Failed to cancel request.",
+                type: "error",
+            });
+
+        } finally {
+
+            setActionLoading(false);
+        }
+    };
+
     /*
     |--------------------------------------------------------------------------
     | EFFECTS
@@ -103,13 +191,7 @@ export default function Page() {
 
         fetchTravelRequests(page);
 
-    }, [page, tab]);
-
-    useEffect(() => {
-
-        setPage(1);
-
-    }, [tab]);
+    }, [page]);
 
     return (
 
@@ -124,11 +206,6 @@ export default function Page() {
                     justify-between
                 "
             >
-
-                <Tabs
-                    value={tab}
-                    onChange={setTab}
-                />
 
                 {/* CREATE BUTTON */}
                 <button
@@ -163,6 +240,12 @@ export default function Page() {
                 data={data}
                 loading={loading}
                 onView={handleView}
+                onComplete={
+                    handleComplete
+                }
+                onCancel={
+                    handleOpenCancel
+                }
                 employeeView={true}
             />
 
@@ -409,7 +492,7 @@ export default function Page() {
 
                             {/* PERSONAL VEHICLE */}
                             {selected.transportation_type ===
-                                "personal_vehicle" && (
+                                "Personal Vehicle" && (
 
                                     <div
                                         className="
@@ -626,6 +709,96 @@ export default function Page() {
                 )}
 
             </Drawer>
+
+            <Modal
+                open={cancelOpen}
+                onClose={() => {
+                
+                    setCancelOpen(false);
+                
+                    setCancelReason("");
+                
+                    setSelectedTravel(null);
+                }}
+                title="Cancel Travel Request"
+                subtitle="
+                    Please provide a reason for cancellation.
+                "
+                footer={(
+                    <>
+                        <button
+                            onClick={() => {
+                            
+                                setCancelOpen(false);
+                            
+                                setCancelReason("");
+                            
+                                setSelectedTravel(null);
+                            }}
+                            className="
+                                px-4
+                                py-2
+                                rounded-xl
+                                border
+                                hover:bg-gray-50
+                            "
+                        >
+                            Close
+                        </button>
+                        
+                        <button
+                            onClick={handleCancel}
+                            disabled={
+                                actionLoading
+                                ||
+                                !cancelReason.trim()
+                            }
+                            className="
+                                px-4
+                                py-2
+                                rounded-xl
+                                bg-red-600
+                                text-white
+                                hover:bg-red-700
+                                disabled:opacity-50
+                            "
+                        >
+                            {
+                                actionLoading
+                                    ? "Cancelling..."
+                                    : "Confirm Cancellation"
+                            }
+                        </button>
+                    </>
+                )}
+            >
+            
+                <textarea
+                    value={cancelReason}
+                    onChange={(e) =>
+                        setCancelReason(
+                            e.target.value
+                        )
+                    }
+                    rows={5}
+                    placeholder="
+                        Enter cancellation reason...
+                    "
+                    className="
+                        w-full
+                        rounded-xl
+                        border
+                        border-gray-300
+                        px-4
+                        py-3
+                        text-sm
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-red-500
+                    "
+                />
+            
+            </Modal>
 
             {/* CREATE MODAL */}
             <CreateTravelModal

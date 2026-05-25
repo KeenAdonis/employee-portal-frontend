@@ -6,8 +6,7 @@ const api = axios.create({
     Accept: "application/json",
   },
 });
-console.log("ENV:", process.env.NEXT_PUBLIC_API_URL);
-// 🔥 AUTO ATTACH TOKEN EVERY REQUEST
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
@@ -20,11 +19,22 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (res) => res,
+
   (err) => {
-    if (err.response?.status === 401) {
+
+    const requestUrl = err.config?.url || "";
+
+    // Ignore login endpoint errors
+    if (
+      err.response?.status === 401 &&
+      !requestUrl.includes("/login")
+    ) {
+
       localStorage.removeItem("token");
+
       window.location.href = "/login";
     }
+
     return Promise.reject(err);
   }
 );
