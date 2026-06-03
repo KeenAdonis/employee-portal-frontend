@@ -5,6 +5,7 @@ import AddEmployeeModal from "@/components/adminhr/AddEmployeeModal";
 import EditEmployeeModal from "@/components/adminhr/EditEmployeeModal";
 import EmployeeCard from "@/components/adminhr/EmployeeCard";
 import { Button } from "@/components/ui/button";
+import ToggleRow from "@/components/ui/ToggleButton";
 import api from "@/services/api";
 import { FileDown, FileUp, Hourglass, Pencil, PlusCircle, ShieldCheck, UserRoundPlus, UserX } from "lucide-react";
 import Drawer from "@/components/ui/Drawer";
@@ -131,6 +132,45 @@ export default function EmployeeListPage() {
             ...prev,
             [field]: value
         }));
+    };
+
+    const handleTogglePayrollFlag = async (
+        employeeNo,
+        field
+    ) => {
+        try {
+
+            await api.put(
+                `/employees/${employeeNo}/toggle-payroll-flag`,
+                {
+                    field,
+                }
+            );
+
+            const updatedValue = !selected[field];
+
+            setSelected(prev => ({
+                ...prev,
+                [field]: updatedValue,
+            }));
+
+            fetchEmployees(search);
+
+            showToast({
+                title: "Updated",
+                message: "Payroll deduction updated.",
+                type: "success",
+            });
+
+        } catch (err) {
+
+            showToast({
+                title: "Error",
+                message: "Failed to update payroll deduction.",
+                type: "error",
+            });
+
+        }
     };
 
     const handleSave = async () => {
@@ -428,18 +468,15 @@ export default function EmployeeListPage() {
                     )}
 
                     {/* GRID */}
-                    {!loading && employees.length > 0 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {employees.map((emp, index) => (
-                                <EmployeeCard
-                                    key={emp.id || index}
-                                    employee={emp}
-                                    onView={() => handleView(emp)}
-                                />
-
-                            ))}
-                        </div>
-                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                        {employees.map((emp, index) => (
+                            <EmployeeCard
+                                key={emp.id || index}
+                                employee={emp}
+                                onView={() => handleView(emp)}
+                            />
+                        ))}
+                    </div>
 
                 </div>
 
@@ -461,6 +498,7 @@ export default function EmployeeListPage() {
                             onToggleStatus={handleToggleStatus}
                             onSendPassword={handleSendPassword}
                             onToggleSurveyEligibility={handleToggleSurveyEligibility}
+                            onTogglePayrollFlag={handleTogglePayrollFlag}
                             onEdit={handleEdit}
                             actionLoading={actionLoading}
                         />
@@ -514,12 +552,15 @@ function EmployeeDrawerContent({
     onToggleStatus,
     onToggleSurveyEligibility,
     onSendPassword,
+    onTogglePayrollFlag,
     onEdit,
     actionLoading,
 }) {
     const [menuOpen, setMenuOpen] = useState(false);
 
     const profileImage = getStorageUrl(selected.ProfileImage);
+
+
 
     /* =========================
        DYNAMIC AVATAR COLOR
@@ -801,6 +842,71 @@ function EmployeeDrawerContent({
                         <Info label="PhilHealth Number" value={selected.PhilHealthNumber} />
                         <Info label="Pag-IBIG Number" value={selected.PagIbigNumber} />
                         <Info label="TIN" value={selected.TIN} />
+                    </div>
+                </div>
+
+                <div className="border rounded-2xl p-5 space-y-4">
+                    <h3 className="font-medium text-gray-900 text-sm">
+                        Payroll Deductions
+                    </h3>
+
+                    <div className="space-y-3">
+
+                        <ToggleRow
+                            label="SSS"
+                            checked={selected.has_sss}
+                            onChange={() =>
+                                onTogglePayrollFlag(
+                                    selected.EmployeeNo,
+                                    "has_sss"
+                                )
+                            }
+                        />
+
+                        <ToggleRow
+                            label="PhilHealth"
+                            checked={selected.has_philhealth}
+                            onChange={() =>
+                                onTogglePayrollFlag(
+                                    selected.EmployeeNo,
+                                    "has_philhealth"
+                                )
+                            }
+                        />
+
+                        <ToggleRow
+                            label="Pag-IBIG"
+                            checked={selected.has_pagibig}
+                            onChange={() =>
+                                onTogglePayrollFlag(
+                                    selected.EmployeeNo,
+                                    "has_pagibig"
+                                )
+                            }
+                        />
+
+                        <ToggleRow
+                            label="HMO"
+                            checked={selected.has_hmo}
+                            onChange={() =>
+                                onTogglePayrollFlag(
+                                    selected.EmployeeNo,
+                                    "has_hmo"
+                                )
+                            }
+                        />
+
+                        <ToggleRow
+                            label="Tax"
+                            checked={selected.has_tax}
+                            onChange={() =>
+                                onTogglePayrollFlag(
+                                    selected.EmployeeNo,
+                                    "has_tax"
+                                )
+                            }
+                        />
+
                     </div>
                 </div>
 

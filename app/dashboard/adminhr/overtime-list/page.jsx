@@ -384,23 +384,23 @@ export default function Page() {
                                                 handleAction("approve", selected.id)
                                             )
                                         }
-                                        disabled={approveAction.loading}
+                                        disabled={
+                                            approveAction.loading ||
+                                            selected?.accomplishments?.length === 0
+                                        }
                                         className={`flex-1 h-12 rounded-xl text-sm font-semibold transition-all duration-200
-                                            ${approveAction.loading
+                                            ${approveAction.loading ||
+                                                selected?.accomplishments?.length === 0
                                                 ? "bg-gray-200 text-gray-500 cursor-not-allowed"
                                                 : "bg-green-600 text-white hover:bg-green-700 active:scale-[0.98]"
                                             }
                                         `}
                                     >
-                                        {approveAction.loading ? "Approving..." : "Approve"}
-                                    </button>
-
-                                    {/* REJECT */}
-                                    <button
-                                        onClick={() => setRejectOpen(true)}
-                                        className="flex-1 h-12 rounded-xl text-sm font-semibold bg-red-600 text-white hover:bg-red-700 active:scale-[0.98] transition-all duration-200"
-                                    >
-                                        Reject
+                                        {approveAction.loading
+                                            ? "Approving..."
+                                            : selected?.accomplishments?.length === 0
+                                                ? "No Accomplishments"
+                                                : "Approve"}
                                     </button>
                                 </>
                             )}
@@ -487,8 +487,14 @@ export default function Page() {
                                     </div>
                                 ))
                             ) : (
-                                <div className="text-sm text-gray-400">
-                                    No accomplishments yet
+                                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                                    <p className="text-sm font-medium text-amber-800">
+                                        No accomplishments submitted yet.
+                                    </p>
+
+                                    <p className="text-xs text-amber-600 mt-1">
+                                        Overtime cannot be approved until accomplishments are submitted.
+                                    </p>
                                 </div>
                             )}
 

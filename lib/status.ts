@@ -19,10 +19,9 @@ export const EMPLOYEE_STATUS = {
 export const EMPLOYMENT_STATUS = {
     REGULAR: "Regular",
     PROBATIONARY: "Probationary",
-    PART_TIME: "Part-Time",
-    ON_CALL: "On Call",
-    PROJECT_BASED: "Project-Based",
     CONTRACTUAL: "Contractual",
+    RENDERING: "Rendering",
+    RESIGNED: "Resigned",
 } as const;
 
 // 🔹 APPROVAL-BASED MODULES (Leave, Overtime, Requisition)
@@ -167,22 +166,16 @@ export const getStatusMeta = (status?: StatusType | string): StatusMeta => {
                 className: "bg-yellow-100 text-yellow-700 border border-yellow-200",
             };
 
-        case EMPLOYMENT_STATUS.PART_TIME:
+        case EMPLOYMENT_STATUS.RENDERING:
             return {
                 label: "Part-Time",
                 className: "bg-blue-100 text-blue-700 border border-blue-200",
             };
 
-        case EMPLOYMENT_STATUS.ON_CALL:
+        case EMPLOYMENT_STATUS.RESIGNED:
             return {
                 label: "On Call",
-                className: "bg-purple-100 text-purple-700 border border-purple-200",
-            };
-
-        case EMPLOYMENT_STATUS.PROJECT_BASED:
-            return {
-                label: "Project-Based",
-                className: "bg-cyan-100 text-cyan-700 border border-cyan-200",
+                className: "bg-red-100 text-red-700 border border-red-200",
             };
 
         case EMPLOYMENT_STATUS.CONTRACTUAL:

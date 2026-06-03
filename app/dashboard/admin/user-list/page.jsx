@@ -7,11 +7,8 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
 import { getUsers } from "@/services/userService";
-
 import UsersTable from "@/components/adminsuper/UserTable";
-
 import CreateAdminModal from "@/components/adminsuper/CreateAdminModal";
 
 export default function UsersPage() {

@@ -170,19 +170,20 @@ export default function OvertimeTable({
 
                                 {/* EDIT */}
                                 {onEditAccomplishment &&
-                                    item.Status === "Pre-Approved" && (
+                                    item.Status === "Pre-Approved" &&
+                                    item.accomplishments?.length === 0 && (
 
                                         <button
                                             onClick={() =>
                                                 onEditAccomplishment(item)
                                             }
                                             className="
-                                            w-9 h-9 rounded-lg
-                                            flex items-center justify-center
-                                            text-amber-600
-                                            hover:bg-amber-50
-                                            transition
-                                        "
+                                                w-9 h-9 rounded-lg
+                                                flex items-center justify-center
+                                                text-amber-600
+                                                hover:bg-amber-50
+                                                transition
+                                            "
                                         >
                                             <Pencil className="w-4 h-4" />
                                         </button>

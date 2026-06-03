@@ -12,6 +12,9 @@ export const civilStatusOptions = [
 export const companyStatusOptions = [
     { value: "Regular", label: "Regular" },
     { value: "Probationary", label: "Probationary" },
+    { value: "Contractual", label: "Contractual" },
+    { value: "Rendering", label: "Rendering" },
+    { value: "Resigned", label: "Resigned" },
 ];
 
 export const departmentOptions = [

@@ -1,6 +1,15 @@
 "use client";
 
-import { Eye, Pencil } from "lucide-react";
+import {
+  Eye,
+  Building2,
+  Mail,
+  Phone,
+  BadgeCheck,
+  BriefcaseBusiness,
+  Hash,
+} from "lucide-react";
+
 import { getStorageUrl } from "@/lib/storage";
 import { getStatusMeta } from "@/lib/status";
 
@@ -43,185 +52,213 @@ export default function EmployeeCard({ employee, onView }) {
     }
 
     return colors[Math.abs(hash) % colors.length];
-  }; 
+  };
 
   return (
     <div
       onClick={() => onView && onView()}
       className="
-        bg-white rounded-2xl p-5
-        border border-gray-100
-        shadow-sm hover:shadow-lg
-        transition-all duration-300
-        cursor-pointer
-        flex flex-col h-full
-      "
+      group
+      bg-white
+      rounded-2xl
+      p-5
+      border border-gray-100
+      shadow-sm
+      hover:shadow-xl
+      hover:-translate-y-1
+      transition-all duration-300
+      cursor-pointer
+      flex flex-col
+      h-full
+    "
     >
       {/* HEADER */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex items-center justify-between mb-4">
         <span
-            className={`
-                text-xs
-                px-3
-                py-1
-                rounded-full
-                font-medium
-                border
-                ${companyStatusMeta.className}
-            `}
+          className={`
+          text-xs
+          px-3 py-1
+          rounded-full
+          font-medium
+          border
+          ${companyStatusMeta.className}
+        `}
         >
-            {companyStatusMeta.label}
+          {companyStatusMeta.label}
         </span>
 
-        <div className="flex items-center justify-center">
-
-            <div
-                className={`
-                    relative
-                    flex
-                    items-center
-                    justify-center
-                `}
-            >
-            
-                {/* PING */}
-                <div
-                    className={`
-                        absolute
-                        w-3
-                        h-3
-                        rounded-full
-                        animate-ping
-                        opacity-75
-                        ${
-                            employee.Status?.toUpperCase() === "ACTIVE"
-                                ? "bg-green-400"
-                                : "bg-red-400"
-                        }
-                    `}
-                />
-        
-                {/* DOT */}
-                <div
-                    className={`
-                        relative
-                        w-2.5
-                        h-2.5
-                        rounded-full
-                        ${
-                            employee.Status?.toUpperCase() === "ACTIVE"
-                                ? "bg-green-500"
-                                : "bg-red-500"
-                        }
-                    `}
-                />
-        
-            </div>
-                      
+        <div
+          className={`
+          flex items-center gap-1
+          text-xs font-medium
+          ${employee.Status?.toUpperCase() === "ACTIVE"
+              ? "text-green-600"
+              : "text-red-600"
+            }
+        `}
+        >
+          <BadgeCheck size={14} />
+          {statusMeta.label}
         </div>
       </div>
 
       {/* PROFILE */}
       <div className="flex flex-col items-center text-center">
-        {/* AVATAR */}
         <div
           className={`
-            w-16
-            h-16
-            rounded-full
-            mb-3
-            overflow-hidden
-            flex
-            items-center
-            justify-center
-            text-white
-            font-semibold
-            text-lg
-            shadow-sm
-            ${getColor(fullName)}
-          `}
+          w-20
+          h-20
+          rounded-full
+          mb-3
+          overflow-hidden
+          flex
+          items-center
+          justify-center
+          text-white
+          font-semibold
+          text-xl
+          shadow-md
+          ${getColor(fullName)}
+        `}
         >
-
           {profileImage ? (
-
             <img
               src={profileImage}
               alt={fullName}
               className="w-full h-full object-cover"
             />
-
           ) : (
-
             getInitials(employee.FirstName, employee.LastName)
-
           )}
-
         </div>
 
-        <h2 className="font-semibold text-gray-900 text-sm">
+        <h2 className="font-semibold text-gray-900 text-base">
           {fullName}
         </h2>
 
-        <p className="text-xs text-gray-500 mt-1">
+        {/* POSITION BADGE */}
+        <span
+          className="
+          mt-2
+          inline-flex
+          items-center
+          px-3
+          py-1
+          rounded-full
+          bg-blue-50
+          text-blue-700
+          text-xs
+          font-medium
+        "
+        >
           {employee.Position}
-        </p>
+        </span>
+
+        {/* COMPANY */}
+        <div className="mt-3 text-center">
+          <p className="text-xs text-gray-400 uppercase tracking-wide">
+            Company
+          </p>
+
+          <p className="text-sm font-medium text-gray-700">
+            {employee.Company}
+          </p>
+        </div>
       </div>
 
       {/* INFO */}
-      <div className="mt-4 space-y-2 text-xs text-gray-600">
-        <div className="flex justify-between">
-          <span className="text-gray-400">ID</span>
-          <span className="font-medium">#{employee.EmployeeNo}</span>
+      <div className="mt-3 pt-3 border-t divide-y">
+
+        <div className="py-1 flex items-center justify-between gap-2">
+          <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-purple-50">
+            <Hash size={14} className="text-purple-600" />
+          </div>
+
+          <span className="font-semibold text-gray-900 text-right">
+            #{employee.EmployeeNo}
+          </span>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-gray-400">Department</span>
-          <span className="font-medium truncate max-w-[120px] text-right">
+        <div className="py-1 flex items-center justify-between gap-2">
+          <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-blue-50">
+            <BriefcaseBusiness
+              size={14}
+              className="text-blue-600"
+            />
+          </div>
+
+          <span className="font-medium text-gray-700 text-right">
             {employee.Department}
           </span>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-gray-400">Email</span>
-          <span className="truncate max-w-[140px] text-right">
+        <div className="py-1 flex items-center justify-between gap-2">
+          <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-green-50">
+            <Mail
+              size={14}
+              className="text-green-600"
+            />
+          </div>
+
+          <span className="text-gray-700 text-right truncate">
             {employee.EmailAddress}
           </span>
         </div>
 
-        <div className="flex justify-between">
-          <span className="text-gray-400">Contact</span>
-          <span>{employee.ContactNumber}</span>
+        <div className="py-1 flex items-center justify-between gap-2">
+          <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-amber-50">
+            <Phone
+              size={14}
+              className="text-amber-600"
+            />
+          </div>
+
+          <span className="text-gray-700 text-right">
+            {employee.ContactNumber || "-"}
+          </span>
         </div>
+
       </div>
 
       {/* FOOTER */}
-      <div className="mt-auto pt-4 border-t flex justify-between items-center text-xs text-gray-500">
-        <span>
-          Joined: {employee.DateHired || "-"}
-        </span>
+      <div className="mt-auto pt-4 border-t flex items-center justify-between">
+        <div>
+          <p className="text-[11px] text-gray-400">
+            Date Hired
+          </p>
 
-        {/* ACTIONS */}
+          <p className="text-xs font-medium text-gray-700">
+            {employee.DateHired || "-"}
+          </p>
+        </div>
+
         <div
-          className="flex gap-2"
-          onClick={(e) => e.stopPropagation()} // prevent card click
+          onClick={(e) => e.stopPropagation()}
         >
           <button
             onClick={() => onView && onView()}
             className="
-                                    bg-gradient-to-r from-amber-400 to-amber-500
-                                    text-white
-                                    font-medium
-                                    px-2 py-2 rounded-lg
-                                    shadow-md shadow-amber-500/30
-                                    hover:from-amber-300 hover:to-amber-400
-                                    hover:shadow-lg hover:shadow-amber-500/40
-                                    active:scale-[0.98]
-                                    transition-all duration-200
-                                    "
+            flex
+            items-center
+            justify-center
+            w-10
+            h-10
+            rounded-xl
+            bg-gradient-to-r
+            from-amber-400
+            to-amber-500
+            text-white
+            shadow-md
+            shadow-amber-500/30
+            hover:shadow-lg
+            hover:shadow-amber-500/40
+            hover:scale-105
+            transition-all
+            duration-200
+          "
           >
-            <Eye size={16} />
+            <Eye size={18} />
           </button>
-
         </div>
       </div>
     </div>

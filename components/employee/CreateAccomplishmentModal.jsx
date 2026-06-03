@@ -72,7 +72,7 @@ const statusOptions = [
 /* =========================
    INITIAL FORM
 ========================= */
-const initialForm = {
+const getInitialForm = () => ({
     accomplishments: [
         {
             Task: "",
@@ -80,7 +80,7 @@ const initialForm = {
             TaskStatus: "Pending",
         },
     ],
-};
+});
 
 /* =========================
    FORM FIELD
@@ -141,7 +141,7 @@ export default function AddAccomplishmentModal({
 
     const { showToast } = useToast();
 
-    const [form, setForm] = useState(initialForm);
+    const [form, setForm] = useState(getInitialForm());
 
     const [errors, setErrors] = useState({});
 
@@ -152,14 +152,14 @@ export default function AddAccomplishmentModal({
     ========================= */
     useEffect(() => {
 
-        if (!open) {
+        if (open) {
 
-            setForm(initialForm);
+            setForm(getInitialForm());
 
             setErrors({});
         }
 
-    }, [open]);
+    }, [open, overtime?.id]);
 
     /* =========================
        EXISTING COUNT
