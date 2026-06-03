@@ -15,6 +15,7 @@ export const companyStatusOptions = [
 ];
 
 export const departmentOptions = [
+    { value: "Admin Department", label: "Admin Department" },
     { value: "HR-GSD Department", label: "Human Resources Department" },
     { value: "Testing Department", label: "Testing Department" },
     { value: "Marketing Department", label: "Marketing Department" },
@@ -32,12 +33,15 @@ export const companyOptions = [
 export const positionOptions = [
     { value: "President", label: "President" },
     { value: "Executive Director", label: "Executive Director" },
+    { value: "Admin Supervisor", label: "Admin Supervisor" },
     { value: "Human Resources Supervisor", label: "Human Resources Supervisor" },
+    { value: "Branch Manager", label: "Branch Manager" },
     { value: "Testing Supervisor", label: "Testing Supervisor" },
     { value: "Marketing Supervisor", label: "Marketing Supervisor" },
     { value: "Accounting Supervisor", label: "Accounting Supervisor" },
     { value: "Therapy Supervisor", label: "Therapy Supervisor" },
     { value: "M.I.S. Supervisor", label: "M.I.S. Supervisor" },
+    { value: "Admin Assistant", label: "Admin Assistant" },
     { value: "Testing Assistant for Industrial", label: "Testing Assistant for Industrial" },
     { value: "Testing Assistant for Clinical", label: "Testing Assistant for Clinical" },
     { value: "Testing Assistant for Educational", label: "Testing Assistant for Educational" },
