@@ -197,7 +197,7 @@ export default function Page() {
             const statusFilter =
                 tab === "requests"
                     ? "Pending,Pre-Approved"
-                    : "Approved,Rejected";
+                    : "Approved";
 
             const res = await api.get(
                 "/overtime/export",
@@ -420,7 +420,7 @@ export default function Page() {
                                     >
                                         Reject
                                     </button>
-                                                        
+
                                     <button
                                         onClick={() =>
                                             preApproveAction.run(() =>
