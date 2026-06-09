@@ -169,49 +169,93 @@ export default function Page() {
     };
 
     const handleDownload = async () => {
+
         if (!fromDate || !toDate) {
+
             showToast({
                 title: "Warning",
                 message: "Please select date range",
                 type: "warning",
             });
+
             return;
         }
 
         if (fromDate > toDate) {
+
             showToast({
                 title: "Warning",
                 message: "Invalid date range",
                 type: "warning",
             });
+
             return;
         }
 
-        const statusFilter =
-            tab === "requests"
-                ? "Pending,Pre-Approved"
-                : "Approved,Rejected";
+        try {
 
-        const params = new URLSearchParams({
-            from: fromDate,
-            to: toDate,
-            type: exportType,
-            status: statusFilter,
-        });
+            const statusFilter =
+                tab === "requests"
+                    ? "Pending,Pre-Approved"
+                    : "Approved,Rejected";
 
-        const url =
-            `${process.env.NEXT_PUBLIC_API_URL}/overtime/export?${params.toString()}`;
+            const res = await api.get(
+                "/overtime/export",
+                {
+                    params: {
+                        from: fromDate,
+                        to: toDate,
+                        type: exportType,
+                        status: statusFilter,
+                    },
+                    responseType: "blob",
+                }
+            );
 
-        window.open(url, "_blank");
+            const url = window.URL.createObjectURL(
+                new Blob([res.data])
+            );
 
-        showToast({
-            title: "Success",
-            message: "Overtime record downloaded successfully!",
-            type: "success",
-        });
+            const a = document.createElement("a");
 
-        setDownloadOpen(false);
-        resetDownloadState();
+            a.href = url;
+
+            a.download =
+                exportType === "summary"
+                    ? "overtime-summary.csv"
+                    : "overtime-detailed.csv";
+
+            document.body.appendChild(a);
+
+            a.click();
+
+            a.remove();
+
+            window.URL.revokeObjectURL(url);
+
+            showToast({
+                title: "Success",
+                message: "Overtime record downloaded successfully!",
+                type: "success",
+            });
+
+            setDownloadOpen(false);
+
+            resetDownloadState();
+
+        } catch (err) {
+
+            console.error("Download failed:", err);
+
+            showToast({
+                title: "Error",
+                message:
+                    err.response?.data?.message
+                    || "Failed to download overtime report.",
+                type: "error",
+            });
+
+        }
     };
 
     useEffect(() => {
@@ -360,24 +404,64 @@ export default function Page() {
                         <div className="w-full flex gap-3">
 
                             {selected.Status === "Pending" && (
-                                <button
-                                    onClick={() =>
-                                        preApproveAction.run(() =>
-                                            handleAction("pre-approve", selected.id)
-                                        )
-                                    }
-                                    disabled={preApproveAction.loading}
-                                    className={`flex-1 py-3 text-sm font-medium rounded-xl transition ${preApproveAction.loading
-                                        ? "bg-gray-300 cursor-not-allowed"
-                                        : "bg-blue-600 text-white hover:bg-blue-700"
+                                <>
+                                    <button
+                                        onClick={() => setRejectOpen(true)}
+                                        className="
+                                            flex-1
+                                            py-3
+                                            text-sm
+                                            font-medium
+                                            rounded-xl
+                                            bg-red-600
+                                            text-white
+                                            hover:bg-red-700
+                                        "
+                                    >
+                                        Reject
+                                    </button>
+                                                        
+                                    <button
+                                        onClick={() =>
+                                            preApproveAction.run(() =>
+                                                handleAction("pre-approve", selected.id)
+                                            )
+                                        }
+                                        disabled={preApproveAction.loading}
+                                        className={`flex-1 py-3 text-sm font-medium rounded-xl transition ${
+                                            preApproveAction.loading
+                                                ? "bg-gray-300 cursor-not-allowed"
+                                                : "bg-blue-600 text-white hover:bg-blue-700"
                                         }`}
-                                >
-                                    {preApproveAction.loading ? "Pre-Approving..." : "Pre-Approve"}
-                                </button>
+                                    >
+                                        {preApproveAction.loading
+                                            ? "Pre-Approving..."
+                                            : "Pre-Approve"}
+                                    </button>
+                                </>
                             )}
 
                             {selected.Status === "Pre-Approved" && (
                                 <>
+                                    <button
+                                        onClick={() => setRejectOpen(true)}
+                                        disabled={rejectAction.loading}
+                                        className="
+                                            flex-1
+                                            h-12
+                                            rounded-xl
+                                            text-sm
+                                            font-semibold
+                                            bg-red-600
+                                            text-white
+                                            hover:bg-red-700
+                                            active:scale-[0.98]
+                                            transition-all
+                                        "
+                                    >
+                                        Reject
+                                    </button>
+
                                     <button
                                         onClick={() =>
                                             approveAction.run(() =>
@@ -389,10 +473,11 @@ export default function Page() {
                                             selected?.accomplishments?.length === 0
                                         }
                                         className={`flex-1 h-12 rounded-xl text-sm font-semibold transition-all duration-200
-                                            ${approveAction.loading ||
+                                            ${
+                                                approveAction.loading ||
                                                 selected?.accomplishments?.length === 0
-                                                ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                                : "bg-green-600 text-white hover:bg-green-700 active:scale-[0.98]"
+                                                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                                                    : "bg-green-600 text-white hover:bg-green-700 active:scale-[0.98]"
                                             }
                                         `}
                                     >
