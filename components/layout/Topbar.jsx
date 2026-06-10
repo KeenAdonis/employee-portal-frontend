@@ -30,8 +30,6 @@ export default function Topbar({
     const pathname = usePathname();
     const router = useRouter();
 
-    console.log(user);
-
     const profileImage = getStorageUrl(
         user?.profile_image
     );

@@ -27,6 +27,7 @@ OPTIONS
 ========================= */
 const loanTypes = [
     { label: "Salary Loan", value: "Salary Loan" },
+    { label: "Company Deduction", value: "Deduction" },
     { label: "Laptop Loan", value: "Laptop Loan" },
     { label: "SSS Personal Loan", value: "SSS Personal Loan" },
     { label: "SSS Calamity Loan", value: "SSS Calamity Loan" },
